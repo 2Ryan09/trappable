@@ -7,7 +7,8 @@ struct QuadrupoleParams {
     double quad_radius;  // Characteristic dimension of the quadrupole in meters
     double molar_mass;   // Molar mass in kg/mol
 
-    QuadrupoleParams(double freq, double radius, double mass)
+    QuadrupoleParams(double freq, double radius,  // NOLINT(bugprone-easily-swappable-parameters)
+                     double mass)
         : frequency(freq), quad_radius(radius), molar_mass(mass) {}
 };
 
@@ -24,7 +25,7 @@ auto mathieu_a(double voltage_dc, int charge_state, const QuadrupoleParams& para
 auto mz(double voltage_rf, int charge_state, const QuadrupoleParams& params,
         double mathieu_q) -> double;
 auto lmco(double voltage_rf, int charge_state, const QuadrupoleParams& params,
-          double min_q) -> double;
+          double max_q) -> double;
 auto max_mz(double voltage_rf, int charge_state, const QuadrupoleParams& params,
             double max_q) -> double;
 }  // namespace mathieu_lib

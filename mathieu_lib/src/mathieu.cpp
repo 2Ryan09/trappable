@@ -64,7 +64,7 @@ auto particle_mass(double molar_mass) -> double { return molar_mass / AVOGADRO_N
 auto mathieu_q(double voltage_rf, int charge_state, const QuadrupoleParams& params) -> double {
     const double omega_val = omega(params.frequency);
     const double mass = particle_mass(params.molar_mass);
-    return (4.0 * charge_state * E_CHARGE * voltage_rf) /
+    return (4.0 * charge_state * E_CHARGE * (voltage_rf / 2)) /
            (mass * omega_val * omega_val * params.quad_radius * params.quad_radius);
 }
 
@@ -118,8 +118,10 @@ auto mathieu_a(double voltage_dc, int charge_state, const QuadrupoleParams& para
 auto mz(double voltage_rf, int charge_state, const QuadrupoleParams& params,
         double mathieu_q) -> double {
     const double omega_val = omega(params.frequency);
-    return (4.0 * voltage_rf) / ((mathieu_q / AVOGADRO_NUMBER) * (omega_val * omega_val) *
-                                 (params.quad_radius * params.quad_radius));
+    return (4.0 * (voltage_rf / 2) * E_CHARGE) /
+           ((mathieu_q / AVOGADRO_NUMBER) * (omega_val * omega_val) *
+            (params.quad_radius * params.quad_radius)) *
+           1000;
 }
 
 /**
@@ -139,38 +141,38 @@ auto mz(double voltage_rf, int charge_state, const QuadrupoleParams& params,
  * @param charge_state Charge state of the ion (integer).
  * @param omega_val Angular drive frequency in radians per second.
  * @param quad_radius Characteristic dimension of the quadrupole in meters.
- * @param min_q Minimum stable q value (default is 0.25).
+ * @param max_q Minimum stable q value (default is 0.908).
  * @return The LMCO in kg/mol.
  */
 auto lmco(double voltage_rf, int charge_state, const QuadrupoleParams& params,
-          double min_q = MIN_Q) -> double {
-    return mz(voltage_rf, charge_state, params, min_q);
+          double max_q = MAX_Q) -> double {
+    return mz(voltage_rf, charge_state, params, max_q);
 }
 
 /**
  * @brief Calculates the maximum m/z.
  *
  * This function computes the maximum m/z using the formula:
- * \f$ \frac{4 V_{rf}}{(q_{max}/N_A) \omega^2 r_0^2} \f$
+ * \f$ \frac{4 V_{rf_max}}{(q_{max}/N_A) \omega^2 r_0^2} \f$
  *
  * where:
- * - \f$ V_{rf} \f$ is the amplitude of the RF voltage
+ * - \f$ V_{rf_max} \f$ is the maximum amplitude of the RF voltage
  * - \f$ q_{max} \f$ is the maximum stable q value (default is 0.908)
  * - \f$ N_A \f$ is Avogadro's number
  * - \f$ \omega \f$ is the angular drive frequency
  * - \f$ r_0 \f$ is the characteristic dimension of the quadrupole
  *
- * @param voltage_rf Amplitude of the RF voltage in volts.
+ * @param voltage_rf_max Maximum amplitude of the RF voltage in volts.
  * @param charge_state Charge state of the ion (integer).
  * @param frequency Frequency in Hz.
  * @param quad_radius Characteristic dimension of the quadrupole in meters.
  * @param molar_mass Molar mass in kg/mol.
- * @param q The Mathieu q parameter (dimensionless).
+ * @param max_q The maximum stable q value (dimensionless).
  * @return The maximum m/z in kg/mol.
  */
-auto max_mz(double voltage_rf, int charge_state, const QuadrupoleParams& params,
+auto max_mz(double voltage_rf_max, int charge_state, const QuadrupoleParams& params,
             double max_q = MAX_Q) -> double {
-    return mz(voltage_rf, charge_state, params, max_q);
+    return mz(voltage_rf_max, charge_state, params, max_q);
 }
 
 /**
@@ -185,7 +187,7 @@ auto max_mz(double voltage_rf, int charge_state, const QuadrupoleParams& params,
  * @param mathieu_q The Mathieu q parameter (dimensionless).
  * @return The stability parameter beta (dimensionless).
  */
-auto beta(double mathieu_q) -> double { return std::sqrt(2) / (2.0 * mathieu_q); }
+auto beta(double mathieu_q) -> double { return (std::sqrt(2) / 2.0) * mathieu_q; }
 
 /**
  * @brief Calculates the secular frequency for a given drive frequency and Mathieu q parameter.
@@ -204,7 +206,7 @@ auto beta(double mathieu_q) -> double { return std::sqrt(2) / (2.0 * mathieu_q);
  * @return The secular frequency in kHz.
  */
 auto secular_frequency(double frequency, double mathieu_q) -> double {
-    return (omega(frequency) / (2 * M_PI * (beta(mathieu_q)))) / 1000;  // in kHz
+    return (omega(frequency) / (2 * M_PI) * (beta(mathieu_q) / 2)) / 1000;  // in kHz
 }
 }  // namespace mathieu_lib
 

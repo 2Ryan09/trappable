@@ -8,6 +8,8 @@
 #include "mathieu_lib/mathieu.h"
 
 #include <cmath>
+#include <stdexcept>
+#include <vector>
 
 constexpr double E_CHARGE = 1.602176E-19;          // elementary charge in coulombs
 constexpr double AVOGADRO_NUMBER = 6.02214076E23;  // Avogadro's number in mol^-1
@@ -29,7 +31,14 @@ namespace mathieu_lib {
  * @param frequency Frequency in Hz.
  * @return Angular drive frequency in radians per second.
  */
+
 auto omega(double frequency) -> double { return 2.0 * M_PI * frequency; }
+auto omega(const std::vector<double>& frequencies) -> std::vector<double> {
+    std::vector<double> result;
+    result.reserve(frequencies.size());
+    for (double f : frequencies) result.push_back(omega(f));
+    return result;
+}
 
 /**
  * @brief Converts molar mass to particle mass.
@@ -41,6 +50,12 @@ auto omega(double frequency) -> double { return 2.0 * M_PI * frequency; }
  * @return Particle mass in kg.
  */
 auto particle_mass(double molar_mass) -> double { return molar_mass / AVOGADRO_NUMBER; }
+auto particle_mass(const std::vector<double>& molar_masses) -> std::vector<double> {
+    std::vector<double> result;
+    result.reserve(molar_masses.size());
+    for (double m : molar_masses) result.push_back(particle_mass(m));
+    return result;
+}
 
 /**
  * @brief Calculates the Mathieu q parameter for an ion in a quadrupole field.
@@ -67,6 +82,17 @@ auto mathieu_q(double voltage_rf, int charge_state, const QuadrupoleParams& para
     return (4.0 * charge_state * E_CHARGE * (voltage_rf / 2)) /
            (mass * omega_val * omega_val * params.quad_radius * params.quad_radius);
 }
+auto mathieu_q(const std::vector<double>& voltage_rfs, const std::vector<int>& charge_states,
+               const std::vector<QuadrupoleParams>& params) -> std::vector<double> {
+    size_t n = voltage_rfs.size();
+    if (charge_states.size() != n || params.size() != n)
+        throw ::std::invalid_argument("Input vectors must be same size");
+    std::vector<double> result;
+    result.reserve(n);
+    for (size_t i = 0; i < n; ++i)
+        result.push_back(mathieu_q(voltage_rfs[i], charge_states[i], params[i]));
+    return result;
+}
 
 /**
  * @brief Calculates the Mathieu a parameter for an ion in a quadrupole field.
@@ -92,6 +118,17 @@ auto mathieu_a(double voltage_dc, int charge_state, const QuadrupoleParams& para
     const double mass = particle_mass(params.molar_mass);
     return (8.0 * charge_state * E_CHARGE * voltage_dc) /
            (mass * omega_val * omega_val * params.quad_radius * params.quad_radius);
+}
+auto mathieu_a(const std::vector<double>& voltage_dcs, const std::vector<int>& charge_states,
+               const std::vector<QuadrupoleParams>& params) -> std::vector<double> {
+    size_t n = voltage_dcs.size();
+    if (charge_states.size() != n || params.size() != n)
+        throw ::std::invalid_argument("Input vectors must be same size");
+    std::vector<double> result;
+    result.reserve(n);
+    for (size_t i = 0; i < n; ++i)
+        result.push_back(mathieu_a(voltage_dcs[i], charge_states[i], params[i]));
+    return result;
 }
 
 /**
@@ -123,6 +160,18 @@ auto mz(double voltage_rf, int charge_state, const QuadrupoleParams& params,
             (params.quad_radius * params.quad_radius)) *
            1000;
 }
+auto mz(const std::vector<double>& voltage_rfs, const std::vector<int>& charge_states,
+        const std::vector<QuadrupoleParams>& params,
+        const std::vector<double>& mathieu_qs) -> std::vector<double> {
+    size_t n = voltage_rfs.size();
+    if (charge_states.size() != n || params.size() != n || mathieu_qs.size() != n)
+        throw ::std::invalid_argument("Input vectors must be same size");
+    std::vector<double> result;
+    result.reserve(n);
+    for (size_t i = 0; i < n; ++i)
+        result.push_back(mz(voltage_rfs[i], charge_states[i], params[i], mathieu_qs[i]));
+    return result;
+}
 
 /**
  * @brief Calculates the LMCO (Low Mass Cut Off) for a quadrupole mass filter.
@@ -147,6 +196,18 @@ auto mz(double voltage_rf, int charge_state, const QuadrupoleParams& params,
 auto lmco(double voltage_rf, int charge_state, const QuadrupoleParams& params,
           double max_q = MAX_Q) -> double {
     return mz(voltage_rf, charge_state, params, max_q);
+}
+auto lmco(const std::vector<double>& voltage_rfs, const std::vector<int>& charge_states,
+          const std::vector<QuadrupoleParams>& params,
+          const std::vector<double>& max_qs) -> std::vector<double> {
+    size_t n = voltage_rfs.size();
+    if (charge_states.size() != n || params.size() != n || max_qs.size() != n)
+        throw ::std::invalid_argument("Input vectors must be same size");
+    std::vector<double> result;
+    result.reserve(n);
+    for (size_t i = 0; i < n; ++i)
+        result.push_back(lmco(voltage_rfs[i], charge_states[i], params[i], max_qs[i]));
+    return result;
 }
 
 /**
@@ -174,6 +235,18 @@ auto max_mz(double voltage_rf_max, int charge_state, const QuadrupoleParams& par
             double max_q = MAX_Q) -> double {
     return mz(voltage_rf_max, charge_state, params, max_q);
 }
+auto max_mz(const std::vector<double>& voltage_rfs, const std::vector<int>& charge_states,
+            const std::vector<QuadrupoleParams>& params,
+            const std::vector<double>& max_qs) -> std::vector<double> {
+    size_t n = voltage_rfs.size();
+    if (charge_states.size() != n || params.size() != n || max_qs.size() != n)
+        throw ::std::invalid_argument("Input vectors must be same size");
+    std::vector<double> result;
+    result.reserve(n);
+    for (size_t i = 0; i < n; ++i)
+        result.push_back(max_mz(voltage_rfs[i], charge_states[i], params[i], max_qs[i]));
+    return result;
+}
 
 /**
  * @brief Calculates the stability parameter beta for a given Mathieu q parameter.
@@ -187,7 +260,13 @@ auto max_mz(double voltage_rf_max, int charge_state, const QuadrupoleParams& par
  * @param mathieu_q The Mathieu q parameter (dimensionless).
  * @return The stability parameter beta (dimensionless).
  */
-auto beta(double mathieu_q) -> double { return (std::sqrt(2) / 2.0) * mathieu_q; }
+auto beta(double mathieu_q) -> double { return (std::sqrt(2.0) / 2.0) * mathieu_q; }
+auto beta(const std::vector<double>& mathieu_qs) -> std::vector<double> {
+    std::vector<double> result;
+    result.reserve(mathieu_qs.size());
+    for (double q : mathieu_qs) result.push_back(beta(q));
+    return result;
+}
 
 /**
  * @brief Calculates the secular frequency for a given drive frequency and Mathieu q parameter.
@@ -207,6 +286,16 @@ auto beta(double mathieu_q) -> double { return (std::sqrt(2) / 2.0) * mathieu_q;
  */
 auto secular_frequency(double frequency, double mathieu_q) -> double {
     return (omega(frequency) / (2 * M_PI) * (beta(mathieu_q) / 2)) / 1000;  // in kHz
+}
+auto secular_frequency(const std::vector<double>& frequencies,
+                       const std::vector<double>& mathieu_qs) -> std::vector<double> {
+    if (frequencies.size() != mathieu_qs.size())
+        throw ::std::invalid_argument("Input vectors must be same size");
+    std::vector<double> result;
+    result.reserve(frequencies.size());
+    for (size_t i = 0; i < frequencies.size(); ++i)
+        result.push_back(secular_frequency(frequencies[i], mathieu_qs[i]));
+    return result;
 }
 }  // namespace mathieu_lib
 

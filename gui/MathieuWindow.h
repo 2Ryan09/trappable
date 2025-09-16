@@ -1,11 +1,15 @@
 #pragma once
+
+#include <QLabel>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QRadioButton>
 #include <QWidget>
 #include <memory>
 
-class QLineEdit;
-class QPushButton;
-class QLabel;
-
+#include "Inputs.h"
+#include "Outputs.h"
+#include "StabilityOutputs.h"
 #include "plot/StabilityRegionPlotter.h"
 
 namespace trappable {
@@ -15,47 +19,15 @@ class MathieuWindow : public QWidget {
     explicit MathieuWindow(QWidget* parent = nullptr);
     ~MathieuWindow() override;
 
-    QLineEdit* frequencyEdit;
-    QRadioButton* frequencyUnitHz;
-    QRadioButton* frequencyUnitKHz;
-    QLineEdit* radiusEdit;
-    QRadioButton* radiusUnitM;
-    QRadioButton* radiusUnitMM;
-    QLineEdit* massEdit;
-    QRadioButton* massUnitKg;
-    QRadioButton* massUnitG;
-    QLineEdit* voltageRfEdit;
-    QRadioButton* voltageRfUnitV;
-    QRadioButton* voltageRfUnitMV;
-    QLineEdit* voltageRfMaxEdit;
-    QRadioButton* voltageRfMaxUnitV;
-    QRadioButton* voltageRfMaxUnitMV;
-    QLineEdit* voltageDcEdit;
-    QRadioButton* voltageDcUnitV;
-    QRadioButton* voltageDcUnitMV;
-    QLineEdit* chargeStateEdit;
     QPushButton* calcButton;
-    QLabel* omegaValueLabel;
-    QLabel* omegaUnitLabel;
-    QLabel* particleMassValueLabel;
-    QLabel* particleMassUnitLabel;
-    QLabel* mathieuQValueLabel;
-    QLabel* mathieuQUnitLabel;
-    QLabel* mathieuAValueLabel;
-    QLabel* mathieuAUnitLabel;
-    QLabel* betaValueLabel;
-    QLabel* betaUnitLabel;
-    QLabel* secularFrequencyValueLabel;
-    QLabel* secularFrequencyUnitLabel;
-    QLabel* mzValueLabel;
-    QLabel* mzUnitLabel;
-    QLabel* lmcoValueLabel;
-    QLabel* lmcoUnitLabel;
-    QLabel* maxMzValueLabel;
-    QLabel* maxMzUnitLabel;
+    class Inputs* inputs;
+    class Outputs* outputs;
 
     QCustomPlot* stabilityPlotWidget;
     StabilityRegionPlotter* stabilityPlotter;
+
+    // Stability outputs component
+    StabilityOutputs* stabilityOutputs;
 
    private:
     void validateInputs();

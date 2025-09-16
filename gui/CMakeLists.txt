@@ -29,7 +29,7 @@ target_include_directories(mathieubackend PUBLIC
 target_link_libraries(mathieubackend PRIVATE Qt6::Widgets Qt6::PrintSupport)
 
 
-add_library(mathieuwindow STATIC MathieuWindow.cpp MathieuWindow.h)
+add_library(mathieuwindow STATIC MathieuWindow.cpp MathieuWindow.h StabilityOutputs.cpp StabilityOutputs.h Inputs.cpp Inputs.h Outputs.cpp Outputs.h)
 target_include_directories(mathieuwindow PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR}/plot
 	${CMAKE_CURRENT_SOURCE_DIR}/plot/QCustomPlot

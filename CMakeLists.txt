@@ -8,7 +8,9 @@ if(CCACHE_PROGRAM)
 	set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")
 endif()
 
+
 cmake_minimum_required(VERSION 3.16)
+project(trappable LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -29,9 +31,14 @@ option(BUILD_TESTS "Build test executables" ON)
 if(BUILD_TESTS)
 	enable_testing()
 	find_package(GTest REQUIRED)
+	# Ensure libgtest.so is found at runtime
 	add_executable(test_mathieu tests/test_mathieu.cpp)
 	target_include_directories(test_mathieu PRIVATE ${CMAKE_SOURCE_DIR}/mathieu_lib/include)
 	target_link_libraries(test_mathieu PRIVATE mathieu_lib GTest::gtest GTest::gtest_main pthread)
+	set_target_properties(test_mathieu PROPERTIES
+		INSTALL_RPATH "$ORIGIN:/usr/lib:/usr/lib/x86_64-linux-gnu:/usr/local/lib"
+		BUILD_WITH_INSTALL_RPATH ON
+	)
 	add_test(NAME test_mathieu COMMAND test_mathieu)
 
 	# GUI E2E test

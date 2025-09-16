@@ -17,7 +17,7 @@ namespace trappable {
 constexpr double MAX_Q = 0.908;
 
 MathieuWindow::MathieuWindow(QWidget* parent) : QWidget(parent) {
-    setWindowTitle("Mathieu Quadrupole Stability Calculator");
+    setWindowTitle(QStringLiteral("Mathieu Quadrupole Stability Calculator"));
     // Use a horizontal layout: left = inputs/results, right = plot
     auto* mainLayout = new QHBoxLayout(this);
 
@@ -27,20 +27,18 @@ MathieuWindow::MathieuWindow(QWidget* parent) : QWidget(parent) {
     auto* inputGroup = new QGroupBox(QStringLiteral("Inputs"), leftWidget);
     auto* formLayout = new QFormLayout(inputGroup);
 
-    frequencyEdit = new QLineEdit;
-    frequencyEdit->setObjectName("frequencyEdit");
-    radiusEdit = new QLineEdit;
-    radiusEdit->setObjectName("radiusEdit");
-    massEdit = new QLineEdit;
-    massEdit->setObjectName("massEdit");
-    voltageRfEdit = new QLineEdit;
-    voltageRfEdit->setObjectName("voltageRfEdit");
-    voltageRfMaxEdit = new QLineEdit;
-    voltageRfMaxEdit->setObjectName("voltageRfMaxEdit");
-    voltageDcEdit = new QLineEdit;
-    voltageDcEdit->setObjectName("voltageDcEdit");
-    chargeStateEdit = new QLineEdit;
-    chargeStateEdit->setObjectName("chargeStateEdit");
+    auto makeLineEdit = [this](const char* name) {
+        auto* edit = new QLineEdit;
+        edit->setObjectName(QString::fromUtf8(name));
+        return edit;
+    };
+    frequencyEdit = makeLineEdit("frequencyEdit");
+    radiusEdit = makeLineEdit("radiusEdit");
+    massEdit = makeLineEdit("massEdit");
+    voltageRfEdit = makeLineEdit("voltageRfEdit");
+    voltageRfMaxEdit = makeLineEdit("voltageRfMaxEdit");
+    voltageDcEdit = makeLineEdit("voltageDcEdit");
+    chargeStateEdit = makeLineEdit("chargeStateEdit");
 
     frequencyEdit->setValidator(new QDoubleValidator(this));
     radiusEdit->setValidator(new QDoubleValidator(this));
@@ -50,18 +48,18 @@ MathieuWindow::MathieuWindow(QWidget* parent) : QWidget(parent) {
     voltageDcEdit->setValidator(new QDoubleValidator(this));
     chargeStateEdit->setValidator(new QIntValidator(this));
 
-    formLayout->addRow("Frequency (Hz):", frequencyEdit);
-    formLayout->addRow("Quadrupole radius (m):", radiusEdit);
-    formLayout->addRow("Molar mass (kg/mol):", massEdit);
-    formLayout->addRow("RF Voltage (V):", voltageRfEdit);
-    formLayout->addRow("RF Voltage (max, V):", voltageRfMaxEdit);
-    formLayout->addRow("DC Voltage (V):", voltageDcEdit);
-    formLayout->addRow("Charge state:", chargeStateEdit);
+    formLayout->addRow(QStringLiteral("Frequency (Hz):"), frequencyEdit);
+    formLayout->addRow(QStringLiteral("Quadrupole radius (m):"), radiusEdit);
+    formLayout->addRow(QStringLiteral("Molar mass (kg/mol):"), massEdit);
+    formLayout->addRow(QStringLiteral("RF Voltage (V):"), voltageRfEdit);
+    formLayout->addRow(QStringLiteral("RF Voltage (max, V):"), voltageRfMaxEdit);
+    formLayout->addRow(QStringLiteral("DC Voltage (V):"), voltageDcEdit);
+    formLayout->addRow(QStringLiteral("Charge state:"), chargeStateEdit);
     inputGroup->setLayout(formLayout);
     leftLayout->addWidget(inputGroup);
 
     calcButton = new QPushButton(QStringLiteral("Calculate"));
-    calcButton->setObjectName("calcButton");
+    calcButton->setObjectName(QStringLiteral("calcButton"));
     calcButton->setEnabled(false);
     leftLayout->addWidget(calcButton);
 
@@ -78,65 +76,65 @@ MathieuWindow::MathieuWindow(QWidget* parent) : QWidget(parent) {
     connect(chargeStateEdit, &QLineEdit::textChanged, this, validateInputs);
 
     // Add horizontal separator)
-    QFrame* separator = new QFrame;
+    auto* separator = new QFrame;
     separator->setFrameShape(QFrame::HLine);
     separator->setFrameShadow(QFrame::Sunken);
     leftLayout->addWidget(separator);
 
     auto* outputGroup = new QGroupBox(QStringLiteral("Outputs"), leftWidget);
-    QGridLayout* outputLayout = new QGridLayout(outputGroup);
+    auto* outputLayout = new QGridLayout(outputGroup);
     int row = 0;
     omegaValueLabel = new QLabel(leftWidget);
     omegaUnitLabel = new QLabel(QStringLiteral("Hz"), leftWidget);
-    outputLayout->addWidget(new QLabel("Omega:"), row, 0);
+    outputLayout->addWidget(new QLabel(QStringLiteral("Omega:")), row, 0);
     outputLayout->addWidget(omegaValueLabel, row, 1);
     outputLayout->addWidget(omegaUnitLabel, row++, 2);
 
     particleMassValueLabel = new QLabel(leftWidget);
     particleMassUnitLabel = new QLabel(QStringLiteral("kg"), leftWidget);
-    outputLayout->addWidget(new QLabel("Particle mass:"), row, 0);
+    outputLayout->addWidget(new QLabel(QStringLiteral("Particle mass:")), row, 0);
     outputLayout->addWidget(particleMassValueLabel, row, 1);
     outputLayout->addWidget(particleMassUnitLabel, row++, 2);
 
     mathieuQValueLabel = new QLabel(leftWidget);
     mathieuQUnitLabel = new QLabel(QStringLiteral(""), leftWidget);
-    outputLayout->addWidget(new QLabel("Mathieu q:"), row, 0);
+    outputLayout->addWidget(new QLabel(QStringLiteral("Mathieu q:")), row, 0);
     outputLayout->addWidget(mathieuQValueLabel, row, 1);
     outputLayout->addWidget(mathieuQUnitLabel, row++, 2);
 
     mathieuAValueLabel = new QLabel(leftWidget);
     mathieuAUnitLabel = new QLabel(QStringLiteral(""), leftWidget);
-    outputLayout->addWidget(new QLabel("Mathieu a:"), row, 0);
+    outputLayout->addWidget(new QLabel(QStringLiteral("Mathieu a:")), row, 0);
     outputLayout->addWidget(mathieuAValueLabel, row, 1);
     outputLayout->addWidget(mathieuAUnitLabel, row++, 2);
 
     betaValueLabel = new QLabel(leftWidget);
     betaUnitLabel = new QLabel(QStringLiteral(""), leftWidget);
-    outputLayout->addWidget(new QLabel("Beta:"), row, 0);
+    outputLayout->addWidget(new QLabel(QStringLiteral("Beta:")), row, 0);
     outputLayout->addWidget(betaValueLabel, row, 1);
     outputLayout->addWidget(betaUnitLabel, row++, 2);
 
     secularFrequencyValueLabel = new QLabel(leftWidget);
     secularFrequencyUnitLabel = new QLabel(QStringLiteral("Hz"), leftWidget);
-    outputLayout->addWidget(new QLabel("Secular frequency:"), row, 0);
+    outputLayout->addWidget(new QLabel(QStringLiteral("Secular frequency:")), row, 0);
     outputLayout->addWidget(secularFrequencyValueLabel, row, 1);
     outputLayout->addWidget(secularFrequencyUnitLabel, row++, 2);
 
     mzValueLabel = new QLabel(leftWidget);
     mzUnitLabel = new QLabel(QStringLiteral("Da"), leftWidget);
-    outputLayout->addWidget(new QLabel("m/z:"), row, 0);
+    outputLayout->addWidget(new QLabel(QStringLiteral("m/z:")), row, 0);
     outputLayout->addWidget(mzValueLabel, row, 1);
     outputLayout->addWidget(mzUnitLabel, row++, 2);
 
     lmcoValueLabel = new QLabel(leftWidget);
     lmcoUnitLabel = new QLabel(QStringLiteral("Da"), leftWidget);
-    outputLayout->addWidget(new QLabel("LMCO:"), row, 0);
+    outputLayout->addWidget(new QLabel(QStringLiteral("LMCO:")), row, 0);
     outputLayout->addWidget(lmcoValueLabel, row, 1);
     outputLayout->addWidget(lmcoUnitLabel, row++, 2);
 
     maxMzValueLabel = new QLabel(leftWidget);
     maxMzUnitLabel = new QLabel(QStringLiteral("Da"), leftWidget);
-    outputLayout->addWidget(new QLabel("Max m/z:"), row, 0);
+    outputLayout->addWidget(new QLabel(QStringLiteral("Max m/z:")), row, 0);
     outputLayout->addWidget(maxMzValueLabel, row, 1);
     outputLayout->addWidget(maxMzUnitLabel, row++, 2);
 

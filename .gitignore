@@ -1,5 +1,5 @@
-# Taken from https://github.com/github/gitignore/blob/main/Qt.gitignore
-
+# Qt, C++ and build system ignores
+# ----------------------------------
 # C++ objects and libs
 *.slo
 *.lo
@@ -12,16 +12,7 @@
 *.dll
 *.dylib
 
-# Qt-es
-object_script.*.Release
-object_script.*.Debug
-*_plugin_import.cpp
-/.qmake.cache
-/.qmake.stash
-*.pro.user
-*.pro.user.*
-*.qbs.user
-*.qbs.user.*
+# Qt build and meta-object files
 *.moc
 moc_*.cpp
 moc_*.h
@@ -29,67 +20,48 @@ qrc_*.cpp
 ui_*.h
 *.qmlc
 *.jsc
-Makefile*
-*build-*
-*.qm
-*.prl
-*.depends
+*_plugin_import.cpp
+*_qmlcache.qrc
+object_script.*.Release
+object_script.*.Debug
 
-# Qt unit tests
-target_wrapper.*
+# QtCreator and IDE files
+*.pro.user
+*.pro.user.*
+*.qbs.user
+*.qbs.user.*
+*.autosave
+*.qmlproject.user
+*.qmlproject.user.*
+CMakeLists.txt.user*
+CMakeLists.txt.user
+*creator.user*
 
 # CMake and build system
 CMakeFiles/
 CMakeCache.txt
 cmake_install.cmake
-build/
-Testing/
+Makefile*
 CTestTestfile.cmake
-
-# Binaries
-/gui/gui
-/tests/test_mathieu
-
-# VSCode settings (optional, uncomment if you want to ignore local settings)
-# .vscode/
-
-# QtCreator
-*.autosave
-
-# QtCreator Qml
-*.qmlproject.user
-*.qmlproject.user.*
-
-# QtCreator CMake
-CMakeLists.txt.user*
-
-# QtCreator 4.8< compilation database
 compile_commands.json
-
-# QtCreator local machine specific files for imported projects
-*creator.user*
-
-*_qmlcache.qrc
-
-# Taken from https://github.com/github/gitignore/blob/main/CMake.gitignore
-
-CMakeLists.txt.user
-CMakeCache.txt
-CMakeFiles
 CMakeScripts
+Testing/
 Testing
-Makefile
-cmake_install.cmake
-install_manifest.txt
-compile_commands.json
-CTestTestfile.cmake
+build/
+*build-*
 _deps
+install_manifest.txt
 CMakeUserPresets.json
 
-# Compiled binaries
+# Binaries and test executables
 gui/gui
 tests/test_mathieu
+test_mathieu
+test_mathieu_e2e
 
-# Custom
+# Editor/OS files
+.DS_Store
+Thumbs.db
+
+# VSCode (uncomment if you want to ignore local settings)
 .vscode/
-build/

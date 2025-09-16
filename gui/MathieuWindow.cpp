@@ -110,6 +110,8 @@ MathieuWindow::MathieuWindow(QWidget* parent) : QWidget(parent) {
                                 .arg(lmco_val)
                                 .arg(max_mz_val);
         resultLabel->setText(res);
+        // Plot the calculated Mathieu q and a on the stability plot
+        stabilityPlotter->plotPoint(mathieu_q_val, mathieu_a_val);
     });
 }
 

@@ -56,9 +56,51 @@ MathieuWindow::MathieuWindow(QWidget* parent) : QWidget(parent) {
     inputGroup->setLayout(formLayout);
     leftLayout->addWidget(inputGroup);
 
-    calcButton = new QPushButton("Calculate");
+    calcButton = new QPushButton(QStringLiteral("Calculate"));
     calcButton->setObjectName("calcButton");
+    calcButton->setEnabled(false);
     leftLayout->addWidget(calcButton);
+
+    // Helper lambda to check all input validity
+    auto validateInputs = [this]() {
+        bool ok_freq = false, ok_radius = false, ok_mass = false, ok_voltage_rf = false,
+             ok_voltage_rf_max = false, ok_voltage_dc = false, ok_charge_state = false;
+        frequencyEdit->text().toDouble(&ok_freq);
+        radiusEdit->text().toDouble(&ok_radius);
+        massEdit->text().toDouble(&ok_mass);
+        voltageRfEdit->text().toDouble(&ok_voltage_rf);
+        voltageRfMaxEdit->text().toDouble(&ok_voltage_rf_max);
+        voltageDcEdit->text().toDouble(&ok_voltage_dc);
+        chargeStateEdit->text().toInt(&ok_charge_state);
+        bool allValid = ok_freq && ok_radius && ok_mass && ok_voltage_rf && ok_voltage_rf_max &&
+                        ok_voltage_dc && ok_charge_state;
+        calcButton->setEnabled(allValid);
+        frequencyEdit->setToolTip(ok_freq ? QStringLiteral("")
+                                          : QStringLiteral("Enter a valid frequency (Hz)"));
+        radiusEdit->setToolTip(ok_radius ? QStringLiteral("")
+                                         : QStringLiteral("Enter a valid quadrupole radius (m)"));
+        massEdit->setToolTip(ok_mass ? QStringLiteral("")
+                                     : QStringLiteral("Enter a valid molar mass (kg/mol)"));
+        voltageRfEdit->setToolTip(ok_voltage_rf ? QStringLiteral("")
+                                                : QStringLiteral("Enter a valid RF voltage (V)"));
+        voltageRfMaxEdit->setToolTip(ok_voltage_rf_max
+                                         ? QStringLiteral("")
+                                         : QStringLiteral("Enter a valid max RF voltage (V)"));
+        voltageDcEdit->setToolTip(ok_voltage_dc ? QStringLiteral("")
+                                                : QStringLiteral("Enter a valid DC voltage (V)"));
+        chargeStateEdit->setToolTip(ok_charge_state
+                                        ? QStringLiteral("")
+                                        : QStringLiteral("Enter a valid charge state (integer)"));
+    };
+
+    // Connect input edits to validation
+    connect(frequencyEdit, &QLineEdit::textChanged, this, validateInputs);
+    connect(radiusEdit, &QLineEdit::textChanged, this, validateInputs);
+    connect(massEdit, &QLineEdit::textChanged, this, validateInputs);
+    connect(voltageRfEdit, &QLineEdit::textChanged, this, validateInputs);
+    connect(voltageRfMaxEdit, &QLineEdit::textChanged, this, validateInputs);
+    connect(voltageDcEdit, &QLineEdit::textChanged, this, validateInputs);
+    connect(chargeStateEdit, &QLineEdit::textChanged, this, validateInputs);
 
     // Add horizontal separator)
     QFrame* separator = new QFrame;

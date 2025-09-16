@@ -1,3 +1,5 @@
+
+
 #include "MathieuWindow.h"
 
 #include <QDoubleValidator>
@@ -9,6 +11,8 @@
 #include <QVBoxLayout>
 
 #include "mathieu_lib/mathieu.h"
+
+namespace trappable {
 
 constexpr double MAX_Q = 0.908;
 
@@ -62,36 +66,7 @@ MathieuWindow::MathieuWindow(QWidget* parent) : QWidget(parent) {
     leftLayout->addWidget(calcButton);
 
     // Helper lambda to check all input validity
-    auto validateInputs = [this]() {
-        bool ok_freq = false, ok_radius = false, ok_mass = false, ok_voltage_rf = false,
-             ok_voltage_rf_max = false, ok_voltage_dc = false, ok_charge_state = false;
-        frequencyEdit->text().toDouble(&ok_freq);
-        radiusEdit->text().toDouble(&ok_radius);
-        massEdit->text().toDouble(&ok_mass);
-        voltageRfEdit->text().toDouble(&ok_voltage_rf);
-        voltageRfMaxEdit->text().toDouble(&ok_voltage_rf_max);
-        voltageDcEdit->text().toDouble(&ok_voltage_dc);
-        chargeStateEdit->text().toInt(&ok_charge_state);
-        bool allValid = ok_freq && ok_radius && ok_mass && ok_voltage_rf && ok_voltage_rf_max &&
-                        ok_voltage_dc && ok_charge_state;
-        calcButton->setEnabled(allValid);
-        frequencyEdit->setToolTip(ok_freq ? QStringLiteral("")
-                                          : QStringLiteral("Enter a valid frequency (Hz)"));
-        radiusEdit->setToolTip(ok_radius ? QStringLiteral("")
-                                         : QStringLiteral("Enter a valid quadrupole radius (m)"));
-        massEdit->setToolTip(ok_mass ? QStringLiteral("")
-                                     : QStringLiteral("Enter a valid molar mass (kg/mol)"));
-        voltageRfEdit->setToolTip(ok_voltage_rf ? QStringLiteral("")
-                                                : QStringLiteral("Enter a valid RF voltage (V)"));
-        voltageRfMaxEdit->setToolTip(ok_voltage_rf_max
-                                         ? QStringLiteral("")
-                                         : QStringLiteral("Enter a valid max RF voltage (V)"));
-        voltageDcEdit->setToolTip(ok_voltage_dc ? QStringLiteral("")
-                                                : QStringLiteral("Enter a valid DC voltage (V)"));
-        chargeStateEdit->setToolTip(ok_charge_state
-                                        ? QStringLiteral("")
-                                        : QStringLiteral("Enter a valid charge state (integer)"));
-    };
+    auto validateInputs = [this]() { this->validateInputs(); };
 
     // Connect input edits to validation
     connect(frequencyEdit, &QLineEdit::textChanged, this, validateInputs);
@@ -205,63 +180,110 @@ MathieuWindow::MathieuWindow(QWidget* parent) : QWidget(parent) {
     unstableLabel->setColor(Qt::red);
 
     connect(
-        calcButton, &QPushButton::clicked, this,
-        [this]() {
-            bool ok_freq = false, ok_radius = false, ok_mass = false, ok_voltage_rf = false,
-                 ok_voltage_rf_max = false, ok_voltage_dc = false, ok_charge_state = false;
-            double freq = frequencyEdit->text().toDouble(&ok_freq);
-            double radius = radiusEdit->text().toDouble(&ok_radius);
-            double mass = massEdit->text().toDouble(&ok_mass);
-            double voltage_rf = voltageRfEdit->text().toDouble(&ok_voltage_rf);
-            double voltage_rf_max = voltageRfMaxEdit->text().toDouble(&ok_voltage_rf_max);
-            double voltage_dc = voltageDcEdit->text().toDouble(&ok_voltage_dc);
-            int charge_state = chargeStateEdit->text().toInt(&ok_charge_state);
-            if (!(ok_freq && ok_radius && ok_mass && ok_voltage_rf && ok_voltage_rf_max &&
-                  ok_voltage_dc && ok_charge_state)) {
-                omegaValueLabel->setText("Invalid");
-                particleMassValueLabel->setText("Invalid");
-                mathieuQValueLabel->setText("Invalid");
-                mathieuAValueLabel->setText("Invalid");
-                betaValueLabel->setText("Invalid");
-                secularFrequencyValueLabel->setText("Invalid");
-                mzValueLabel->setText("Invalid");
-                lmcoValueLabel->setText("Invalid");
-                maxMzValueLabel->setText("Invalid");
-                return;
-            }
-            mathieu_lib::QuadrupoleParams params(freq, radius, mass);
-            double omega_val = mathieu_lib::omega(freq);
-            double particle_mass_val = mathieu_lib::particle_mass(mass);
-            double mathieu_q_val = mathieu_lib::mathieu_q(voltage_rf, charge_state, params);
-            double mathieu_a_val = mathieu_lib::mathieu_a(voltage_dc, charge_state, params);
-            double beta_val = mathieu_lib::beta(mathieu_q_val);
-            double secular_freq_val = mathieu_lib::secular_frequency(freq, mathieu_q_val);
-            double mz_val = mathieu_lib::mz(voltage_rf, charge_state, params, mathieu_q_val);
-            double lmco_val = mathieu_lib::lmco(voltage_rf, charge_state, params, MAX_Q);
-            double max_mz_val = mathieu_lib::max_mz(voltage_rf_max, charge_state, params, MAX_Q);
-            auto formatValue = [](double val) {
-                double absVal = std::abs(val);
-                if ((absVal > 0 && (absVal < 0.001 || absVal >= 10000))) {
-                    return QString::number(val, 'e', 3);  // scientific notation, 3 decimals
-                } else {
-                    return QString::number(val, 'f', 3);  // fixed, 3 decimals
-                }
-            };
-            omegaValueLabel->setText(formatValue(omega_val));
-            particleMassValueLabel->setText(formatValue(particle_mass_val));
-            mathieuQValueLabel->setText(formatValue(mathieu_q_val));
-            mathieuAValueLabel->setText(formatValue(mathieu_a_val));
-            betaValueLabel->setText(formatValue(beta_val));
-            secularFrequencyValueLabel->setText(formatValue(secular_freq_val));
-            mzValueLabel->setText(formatValue(mz_val));
-            lmcoValueLabel->setText(formatValue(lmco_val));
-            maxMzValueLabel->setText(formatValue(max_mz_val));
-            // Plot the calculated Mathieu q and a on the stability plot
-            stabilityPlotter->plotPoint(mathieu_q_val, mathieu_a_val);
-        },
+        calcButton, &QPushButton::clicked, this, [this]() { this->handleCalculation(); },
         Qt::QueuedConnection);
 }
 
 MathieuWindow::~MathieuWindow() {
     // All child widgets are deleted by Qt's parent-child mechanism
 }
+
+// --- Private methods for organization ---
+void MathieuWindow::validateInputs() {
+    bool ok_freq = false, ok_radius = false, ok_mass = false, ok_voltage_rf = false,
+         ok_voltage_rf_max = false, ok_voltage_dc = false, ok_charge_state = false;
+    frequencyEdit->text().toDouble(&ok_freq);
+    radiusEdit->text().toDouble(&ok_radius);
+    massEdit->text().toDouble(&ok_mass);
+    voltageRfEdit->text().toDouble(&ok_voltage_rf);
+    voltageRfMaxEdit->text().toDouble(&ok_voltage_rf_max);
+    voltageDcEdit->text().toDouble(&ok_voltage_dc);
+    chargeStateEdit->text().toInt(&ok_charge_state);
+    bool allValid = ok_freq && ok_radius && ok_mass && ok_voltage_rf && ok_voltage_rf_max &&
+                    ok_voltage_dc && ok_charge_state;
+    calcButton->setEnabled(allValid);
+    frequencyEdit->setToolTip(ok_freq ? QStringLiteral("")
+                                      : QStringLiteral("Enter a valid frequency (Hz)"));
+    radiusEdit->setToolTip(ok_radius ? QStringLiteral("")
+                                     : QStringLiteral("Enter a valid quadrupole radius (m)"));
+    massEdit->setToolTip(ok_mass ? QStringLiteral("")
+                                 : QStringLiteral("Enter a valid molar mass (kg/mol)"));
+    voltageRfEdit->setToolTip(ok_voltage_rf ? QStringLiteral("")
+                                            : QStringLiteral("Enter a valid RF voltage (V)"));
+    voltageRfMaxEdit->setToolTip(ok_voltage_rf_max
+                                     ? QStringLiteral("")
+                                     : QStringLiteral("Enter a valid max RF voltage (V)"));
+    voltageDcEdit->setToolTip(ok_voltage_dc ? QStringLiteral("")
+                                            : QStringLiteral("Enter a valid DC voltage (V)"));
+    chargeStateEdit->setToolTip(ok_charge_state
+                                    ? QStringLiteral("")
+                                    : QStringLiteral("Enter a valid charge state (integer)"));
+}
+
+void MathieuWindow::handleCalculation() {
+    bool ok_freq = false, ok_radius = false, ok_mass = false, ok_voltage_rf = false,
+         ok_voltage_rf_max = false, ok_voltage_dc = false, ok_charge_state = false;
+    double freq = frequencyEdit->text().toDouble(&ok_freq);
+    double radius = radiusEdit->text().toDouble(&ok_radius);
+    double mass = massEdit->text().toDouble(&ok_mass);
+    double voltage_rf = voltageRfEdit->text().toDouble(&ok_voltage_rf);
+    double voltage_rf_max = voltageRfMaxEdit->text().toDouble(&ok_voltage_rf_max);
+    double voltage_dc = voltageDcEdit->text().toDouble(&ok_voltage_dc);
+    int charge_state = chargeStateEdit->text().toInt(&ok_charge_state);
+    if (!(ok_freq && ok_radius && ok_mass && ok_voltage_rf && ok_voltage_rf_max && ok_voltage_dc &&
+          ok_charge_state)) {
+        setOutputInvalid();
+        return;
+    }
+    ::mathieu_lib::QuadrupoleParams params(freq, radius, mass);
+    double omega_val = ::mathieu_lib::omega(freq);
+    double particle_mass_val = ::mathieu_lib::particle_mass(mass);
+    double mathieu_q_val = ::mathieu_lib::mathieu_q(voltage_rf, charge_state, params);
+    double mathieu_a_val = ::mathieu_lib::mathieu_a(voltage_dc, charge_state, params);
+    double beta_val = ::mathieu_lib::beta(mathieu_q_val);
+    double secular_freq_val = ::mathieu_lib::secular_frequency(freq, mathieu_q_val);
+    double mz_val = ::mathieu_lib::mz(voltage_rf, charge_state, params, mathieu_q_val);
+    double lmco_val = ::mathieu_lib::lmco(voltage_rf, charge_state, params, ::mathieu_lib::MAX_Q);
+    double max_mz_val =
+        ::mathieu_lib::max_mz(voltage_rf_max, charge_state, params, ::mathieu_lib::MAX_Q);
+    setOutputValues(omega_val, particle_mass_val, mathieu_q_val, mathieu_a_val, beta_val,
+                    secular_freq_val, mz_val, lmco_val, max_mz_val);
+    stabilityPlotter->plotPoint(mathieu_q_val, mathieu_a_val);
+}
+
+void MathieuWindow::setOutputInvalid() {
+    omegaValueLabel->setText(QStringLiteral("Invalid"));
+    particleMassValueLabel->setText(QStringLiteral("Invalid"));
+    mathieuQValueLabel->setText(QStringLiteral("Invalid"));
+    mathieuAValueLabel->setText(QStringLiteral("Invalid"));
+    betaValueLabel->setText(QStringLiteral("Invalid"));
+    secularFrequencyValueLabel->setText(QStringLiteral("Invalid"));
+    mzValueLabel->setText(QStringLiteral("Invalid"));
+    lmcoValueLabel->setText(QStringLiteral("Invalid"));
+    maxMzValueLabel->setText(QStringLiteral("Invalid"));
+}
+
+void MathieuWindow::setOutputValues(double omega_val, double particle_mass_val,
+                                    double mathieu_q_val, double mathieu_a_val, double beta_val,
+                                    double secular_freq_val, double mz_val, double lmco_val,
+                                    double max_mz_val) {
+    auto formatValue = [](double val) {
+        double absVal = std::abs(val);
+        if ((absVal > 0 && (absVal < 0.001 || absVal >= 10000))) {
+            return QString::number(val, 'e', 3);  // scientific notation, 3 decimals
+        } else {
+            return QString::number(val, 'f', 3);  // fixed, 3 decimals
+        }
+    };
+    omegaValueLabel->setText(formatValue(omega_val));
+    particleMassValueLabel->setText(formatValue(particle_mass_val));
+    mathieuQValueLabel->setText(formatValue(mathieu_q_val));
+    mathieuAValueLabel->setText(formatValue(mathieu_a_val));
+    betaValueLabel->setText(formatValue(beta_val));
+    secularFrequencyValueLabel->setText(formatValue(secular_freq_val));
+    mzValueLabel->setText(formatValue(mz_val));
+    lmcoValueLabel->setText(formatValue(lmco_val));
+    maxMzValueLabel->setText(formatValue(max_mz_val));
+}
+
+}  // namespace trappable

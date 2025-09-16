@@ -152,8 +152,8 @@ auto mathieu_a(const std::vector<double>& voltage_dcs, const std::vector<int>& c
  * @param mathieu_q The Mathieu q parameter (dimensionless).
  * @return The m/z (mass-to-charge ratio) in kg/mol.
  */
-auto mz(double voltage_rf, int charge_state, const QuadrupoleParams& params,
-        double mathieu_q) -> double {
+auto mz(double voltage_rf, int charge_state, const QuadrupoleParams& params, double mathieu_q)
+    -> double {
     const double omega_val = omega(params.frequency);
     return (4.0 * (voltage_rf / 2) * E_CHARGE) /
            ((mathieu_q / AVOGADRO_NUMBER) * (omega_val * omega_val) *
@@ -161,8 +161,8 @@ auto mz(double voltage_rf, int charge_state, const QuadrupoleParams& params,
            1000;
 }
 auto mz(const std::vector<double>& voltage_rfs, const std::vector<int>& charge_states,
-        const std::vector<QuadrupoleParams>& params,
-        const std::vector<double>& mathieu_qs) -> std::vector<double> {
+        const std::vector<QuadrupoleParams>& params, const std::vector<double>& mathieu_qs)
+    -> std::vector<double> {
     size_t n = voltage_rfs.size();
     if (charge_states.size() != n || params.size() != n || mathieu_qs.size() != n)
         throw ::std::invalid_argument("Input vectors must be same size");
@@ -193,13 +193,13 @@ auto mz(const std::vector<double>& voltage_rfs, const std::vector<int>& charge_s
  * @param max_q Minimum stable q value (default is 0.908).
  * @return The LMCO in kg/mol.
  */
-auto lmco(double voltage_rf, int charge_state, const QuadrupoleParams& params,
-          double max_q = MAX_Q) -> double {
+auto lmco(double voltage_rf, int charge_state, const QuadrupoleParams& params, double max_q = MAX_Q)
+    -> double {
     return mz(voltage_rf, charge_state, params, max_q);
 }
 auto lmco(const std::vector<double>& voltage_rfs, const std::vector<int>& charge_states,
-          const std::vector<QuadrupoleParams>& params,
-          const std::vector<double>& max_qs) -> std::vector<double> {
+          const std::vector<QuadrupoleParams>& params, const std::vector<double>& max_qs)
+    -> std::vector<double> {
     size_t n = voltage_rfs.size();
     if (charge_states.size() != n || params.size() != n || max_qs.size() != n)
         throw ::std::invalid_argument("Input vectors must be same size");
@@ -236,8 +236,8 @@ auto max_mz(double voltage_rf_max, int charge_state, const QuadrupoleParams& par
     return mz(voltage_rf_max, charge_state, params, max_q);
 }
 auto max_mz(const std::vector<double>& voltage_rfs, const std::vector<int>& charge_states,
-            const std::vector<QuadrupoleParams>& params,
-            const std::vector<double>& max_qs) -> std::vector<double> {
+            const std::vector<QuadrupoleParams>& params, const std::vector<double>& max_qs)
+    -> std::vector<double> {
     size_t n = voltage_rfs.size();
     if (charge_states.size() != n || params.size() != n || max_qs.size() != n)
         throw ::std::invalid_argument("Input vectors must be same size");

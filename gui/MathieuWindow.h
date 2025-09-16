@@ -8,6 +8,8 @@ class QLabel;
 
 #include "plot/StabilityRegionPlotter.h"
 
+namespace trappable {
+
 class MathieuWindow : public QWidget {
    public:
     explicit MathieuWindow(QWidget* parent = nullptr);
@@ -42,4 +44,14 @@ class MathieuWindow : public QWidget {
 
     QCustomPlot* stabilityPlotWidget;
     StabilityRegionPlotter* stabilityPlotter;
+
+   private:
+    void validateInputs();
+    void handleCalculation();
+    void setOutputInvalid();
+    void setOutputValues(double omega_val, double particle_mass_val, double mathieu_q_val,
+                         double mathieu_a_val, double beta_val, double secular_freq_val,
+                         double mz_val, double lmco_val, double max_mz_val);
 };
+
+}  // namespace trappable

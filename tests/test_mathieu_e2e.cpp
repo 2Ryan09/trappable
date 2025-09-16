@@ -5,6 +5,7 @@
 #include <QtTest/QtTest>
 
 #include "MathieuWindow.h"
+using trappable::MathieuWindow;
 
 class GuiE2ETest : public QObject {
    public:

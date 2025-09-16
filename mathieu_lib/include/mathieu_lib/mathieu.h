@@ -39,21 +39,21 @@ auto mathieu_a(double voltage_dc, int charge_state, const QuadrupoleParams& para
 auto mathieu_a(const std::vector<double>& voltage_dcs, const std::vector<int>& charge_states,
                const std::vector<QuadrupoleParams>& params) -> std::vector<double>;
 
-auto mz(double voltage_rf, int charge_state, const QuadrupoleParams& params,
-        double mathieu_q) -> double;
+auto mz(double voltage_rf, int charge_state, const QuadrupoleParams& params, double mathieu_q)
+    -> double;
 auto mz(const std::vector<double>& voltage_rfs, const std::vector<int>& charge_states,
-        const std::vector<QuadrupoleParams>& params,
-        const std::vector<double>& mathieu_qs) -> std::vector<double>;
+        const std::vector<QuadrupoleParams>& params, const std::vector<double>& mathieu_qs)
+    -> std::vector<double>;
 
-auto lmco(double voltage_rf, int charge_state, const QuadrupoleParams& params,
-          double max_q) -> double;
+auto lmco(double voltage_rf, int charge_state, const QuadrupoleParams& params, double max_q)
+    -> double;
 auto lmco(const std::vector<double>& voltage_rfs, const std::vector<int>& charge_states,
-          const std::vector<QuadrupoleParams>& params,
-          const std::vector<double>& max_qs) -> std::vector<double>;
+          const std::vector<QuadrupoleParams>& params, const std::vector<double>& max_qs)
+    -> std::vector<double>;
 
-auto max_mz(double voltage_rf, int charge_state, const QuadrupoleParams& params,
-            double max_q) -> double;
+auto max_mz(double voltage_rf, int charge_state, const QuadrupoleParams& params, double max_q)
+    -> double;
 auto max_mz(const std::vector<double>& voltage_rfs, const std::vector<int>& charge_states,
-            const std::vector<QuadrupoleParams>& params,
-            const std::vector<double>& max_qs) -> std::vector<double>;
+            const std::vector<QuadrupoleParams>& params, const std::vector<double>& max_qs)
+    -> std::vector<double>;
 }  // namespace mathieu_lib

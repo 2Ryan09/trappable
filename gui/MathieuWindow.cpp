@@ -56,6 +56,10 @@ MathieuWindow::MathieuWindow(QWidget* parent) : QWidget(parent) {
     resultLabel->setObjectName("resultLabel");
     mainLayout->addWidget(resultLabel);
 
+    // Add the stability plot widget
+    stabilityPlot = new MathieuStabilityPlot(this);
+    mainLayout->addWidget(stabilityPlot);
+
     connect(calcButton, &QPushButton::clicked, this, [this]() {
         bool ok_freq = false, ok_radius = false, ok_mass = false, ok_voltage_rf = false,
              ok_voltage_rf_max = false, ok_voltage_dc = false, ok_charge_state = false;

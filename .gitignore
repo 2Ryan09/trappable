@@ -25,6 +25,7 @@ ui_*.h
 *_qmlcache.qrc
 object_script.*.Release
 object_script.*.Debug
+*_autogen
 
 # QtCreator and IDE files
 *.pro.user

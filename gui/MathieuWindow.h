@@ -16,11 +16,23 @@ class MathieuWindow : public QWidget {
     ~MathieuWindow() override;
 
     QLineEdit* frequencyEdit;
+    QRadioButton* frequencyUnitHz;
+    QRadioButton* frequencyUnitKHz;
     QLineEdit* radiusEdit;
+    QRadioButton* radiusUnitM;
+    QRadioButton* radiusUnitMM;
     QLineEdit* massEdit;
+    QRadioButton* massUnitKg;
+    QRadioButton* massUnitG;
     QLineEdit* voltageRfEdit;
+    QRadioButton* voltageRfUnitV;
+    QRadioButton* voltageRfUnitMV;
     QLineEdit* voltageRfMaxEdit;
+    QRadioButton* voltageRfMaxUnitV;
+    QRadioButton* voltageRfMaxUnitMV;
     QLineEdit* voltageDcEdit;
+    QRadioButton* voltageDcUnitV;
+    QRadioButton* voltageDcUnitMV;
     QLineEdit* chargeStateEdit;
     QPushButton* calcButton;
     QLabel* omegaValueLabel;

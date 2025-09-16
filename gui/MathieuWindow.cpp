@@ -37,19 +37,57 @@ MathieuWindow::MathieuWindow(QWidget* parent) : QWidget(parent) {
     auto* leftWidget = new QWidget(this);
     auto* leftLayout = new QVBoxLayout(leftWidget);
     auto* inputGroup = new QGroupBox(QStringLiteral("Inputs"), leftWidget);
-    auto* formLayout = new QFormLayout(inputGroup);
+    auto* inputLayout = new QGridLayout(inputGroup);
 
     auto makeLineEdit = [this](const char* name) {
         auto* edit = new QLineEdit;
         edit->setObjectName(QString::fromUtf8(name));
         return edit;
     };
+    auto makeUnitRadios = [](const QString& left, const QString& right) {
+        auto* leftRadio = new QRadioButton(left);
+        auto* rightRadio = new QRadioButton(right);
+        leftRadio->setChecked(true);
+        auto* widget = new QWidget;
+        auto* layout = new QHBoxLayout(widget);
+        layout->setContentsMargins(0, 0, 0, 0);
+        layout->addWidget(leftRadio);
+        layout->addWidget(rightRadio);
+        widget->setLayout(layout);
+        return std::make_tuple(leftRadio, rightRadio, widget);
+    };
+
     frequencyEdit = makeLineEdit("frequencyEdit");
+    auto [frequencyUnitHz, frequencyUnitKHz, frequencyUnitWidget] = makeUnitRadios("Hz", "kHz");
+    this->frequencyUnitHz = frequencyUnitHz;
+    this->frequencyUnitKHz = frequencyUnitKHz;
+
     radiusEdit = makeLineEdit("radiusEdit");
+    auto [radiusUnitM, radiusUnitMM, radiusUnitWidget] = makeUnitRadios("m", "mm");
+    this->radiusUnitM = radiusUnitM;
+    this->radiusUnitMM = radiusUnitMM;
+
     massEdit = makeLineEdit("massEdit");
+    auto [massUnitKg, massUnitG, massUnitWidget] = makeUnitRadios("kg", "g");
+    this->massUnitKg = massUnitKg;
+    this->massUnitG = massUnitG;
+
     voltageRfEdit = makeLineEdit("voltageRfEdit");
+    auto [voltageRfUnitV, voltageRfUnitMV, voltageRfUnitWidget] = makeUnitRadios("V", "mV");
+    this->voltageRfUnitV = voltageRfUnitV;
+    this->voltageRfUnitMV = voltageRfUnitMV;
+
     voltageRfMaxEdit = makeLineEdit("voltageRfMaxEdit");
+    auto [voltageRfMaxUnitV, voltageRfMaxUnitMV, voltageRfMaxUnitWidget] =
+        makeUnitRadios("V", "mV");
+    this->voltageRfMaxUnitV = voltageRfMaxUnitV;
+    this->voltageRfMaxUnitMV = voltageRfMaxUnitMV;
+
     voltageDcEdit = makeLineEdit("voltageDcEdit");
+    auto [voltageDcUnitV, voltageDcUnitMV, voltageDcUnitWidget] = makeUnitRadios("V", "mV");
+    this->voltageDcUnitV = voltageDcUnitV;
+    this->voltageDcUnitMV = voltageDcUnitMV;
+
     chargeStateEdit = makeLineEdit("chargeStateEdit");
 
     frequencyEdit->setValidator(new QDoubleValidator(this));
@@ -60,14 +98,29 @@ MathieuWindow::MathieuWindow(QWidget* parent) : QWidget(parent) {
     voltageDcEdit->setValidator(new QDoubleValidator(this));
     chargeStateEdit->setValidator(new QIntValidator(this));
 
-    formLayout->addRow(QStringLiteral("Frequency (Hz):"), frequencyEdit);
-    formLayout->addRow(QStringLiteral("Quadrupole radius (m):"), radiusEdit);
-    formLayout->addRow(QStringLiteral("Molar mass (kg/mol):"), massEdit);
-    formLayout->addRow(QStringLiteral("RF Voltage (V):"), voltageRfEdit);
-    formLayout->addRow(QStringLiteral("RF Voltage (max, V):"), voltageRfMaxEdit);
-    formLayout->addRow(QStringLiteral("DC Voltage (V):"), voltageDcEdit);
-    formLayout->addRow(QStringLiteral("Charge state:"), chargeStateEdit);
-    inputGroup->setLayout(formLayout);
+    // Add input rows to grid: label, edit, unit widget
+    int inputRow = 0;
+    inputLayout->addWidget(new QLabel("Frequency:"), inputRow, 0);
+    inputLayout->addWidget(frequencyEdit, inputRow, 1);
+    inputLayout->addWidget(frequencyUnitWidget, inputRow++, 2);
+    inputLayout->addWidget(new QLabel("Quadrupole radius:"), inputRow, 0);
+    inputLayout->addWidget(radiusEdit, inputRow, 1);
+    inputLayout->addWidget(radiusUnitWidget, inputRow++, 2);
+    inputLayout->addWidget(new QLabel("Molar mass:"), inputRow, 0);
+    inputLayout->addWidget(massEdit, inputRow, 1);
+    inputLayout->addWidget(massUnitWidget, inputRow++, 2);
+    inputLayout->addWidget(new QLabel("RF Voltage:"), inputRow, 0);
+    inputLayout->addWidget(voltageRfEdit, inputRow, 1);
+    inputLayout->addWidget(voltageRfUnitWidget, inputRow++, 2);
+    inputLayout->addWidget(new QLabel("RF Voltage (max):"), inputRow, 0);
+    inputLayout->addWidget(voltageRfMaxEdit, inputRow, 1);
+    inputLayout->addWidget(voltageRfMaxUnitWidget, inputRow++, 2);
+    inputLayout->addWidget(new QLabel("DC Voltage:"), inputRow, 0);
+    inputLayout->addWidget(voltageDcEdit, inputRow, 1);
+    inputLayout->addWidget(voltageDcUnitWidget, inputRow++, 2);
+    inputLayout->addWidget(new QLabel("Charge state:"), inputRow, 0);
+    inputLayout->addWidget(chargeStateEdit, inputRow, 1);
+    inputGroup->setLayout(inputLayout);
     leftLayout->addWidget(inputGroup);
 
     calcButton = new QPushButton(QStringLiteral("Calculate"));
@@ -242,11 +295,23 @@ void MathieuWindow::handleCalculation() {
     bool ok_freq = false, ok_radius = false, ok_mass = false, ok_voltage_rf = false,
          ok_voltage_rf_max = false, ok_voltage_dc = false, ok_charge_state = false;
     double freq = frequencyEdit->text().toDouble(&ok_freq);
+    if (frequencyUnitKHz->isChecked())
+        freq *= 1000.0;
     double radius = radiusEdit->text().toDouble(&ok_radius);
+    if (radiusUnitMM->isChecked())
+        radius /= 1000.0;
     double mass = massEdit->text().toDouble(&ok_mass);
+    if (massUnitG->isChecked())
+        mass /= 1000.0;
     double voltage_rf = voltageRfEdit->text().toDouble(&ok_voltage_rf);
+    if (voltageRfUnitMV->isChecked())
+        voltage_rf /= 1000.0;
     double voltage_rf_max = voltageRfMaxEdit->text().toDouble(&ok_voltage_rf_max);
+    if (voltageRfMaxUnitMV->isChecked())
+        voltage_rf_max /= 1000.0;
     double voltage_dc = voltageDcEdit->text().toDouble(&ok_voltage_dc);
+    if (voltageDcUnitMV->isChecked())
+        voltage_dc /= 1000.0;
     int charge_state = chargeStateEdit->text().toInt(&ok_charge_state);
     if (!(ok_freq && ok_radius && ok_mass && ok_voltage_rf && ok_voltage_rf_max && ok_voltage_dc &&
           ok_charge_state)) {

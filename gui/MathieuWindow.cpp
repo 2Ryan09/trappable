@@ -12,10 +12,22 @@
 
 #include "mathieu_lib/mathieu.h"
 
+/**
+ * @class MathieuWindow
+ * @brief Main window for the Mathieu quadrupole stability calculator GUI.
+ *
+ * Provides input fields, output display, and stability region plotting for scientific analysis
+ * of quadrupole mass filters using the Mathieu equations. All scientific calculations are
+ * delegated to mathieu_lib. UI is modular and follows Qt best practices.
+ */
 namespace trappable {
 
 constexpr double MAX_Q = 0.908;
 
+/**
+ * @brief Construct the main window and initialize all widgets, layouts, and connections.
+ * @param parent Optional parent widget.
+ */
 MathieuWindow::MathieuWindow(QWidget* parent) : QWidget(parent) {
     setWindowTitle(QStringLiteral("Mathieu Quadrupole Stability Calculator"));
     // Use a horizontal layout: left = inputs/results, right = plot
@@ -187,6 +199,10 @@ MathieuWindow::~MathieuWindow() {
 }
 
 // --- Private methods for organization ---
+/**
+ * @brief Validate all input fields and enable/disable the Calculate button accordingly.
+ *        Also sets tooltips for invalid fields.
+ */
 void MathieuWindow::validateInputs() {
     bool ok_freq = false, ok_radius = false, ok_mass = false, ok_voltage_rf = false,
          ok_voltage_rf_max = false, ok_voltage_dc = false, ok_charge_state = false;
@@ -218,6 +234,10 @@ void MathieuWindow::validateInputs() {
                                     : QStringLiteral("Enter a valid charge state (integer)"));
 }
 
+/**
+ * @brief Perform all scientific calculations and update output widgets and plot.
+ *        Called when the Calculate button is pressed and inputs are valid.
+ */
 void MathieuWindow::handleCalculation() {
     bool ok_freq = false, ok_radius = false, ok_mass = false, ok_voltage_rf = false,
          ok_voltage_rf_max = false, ok_voltage_dc = false, ok_charge_state = false;
@@ -249,6 +269,9 @@ void MathieuWindow::handleCalculation() {
     stabilityPlotter->plotPoint(mathieu_q_val, mathieu_a_val);
 }
 
+/**
+ * @brief Set all output fields to "Invalid" when input validation fails.
+ */
 void MathieuWindow::setOutputInvalid() {
     omegaValueLabel->setText(QStringLiteral("Invalid"));
     particleMassValueLabel->setText(QStringLiteral("Invalid"));
@@ -261,6 +284,18 @@ void MathieuWindow::setOutputInvalid() {
     maxMzValueLabel->setText(QStringLiteral("Invalid"));
 }
 
+/**
+ * @brief Set all output fields to the calculated values, formatted for scientific readability.
+ * @param omega_val Angular frequency (Hz)
+ * @param particle_mass_val Particle mass (kg)
+ * @param mathieu_q_val Mathieu q parameter
+ * @param mathieu_a_val Mathieu a parameter
+ * @param beta_val Beta parameter
+ * @param secular_freq_val Secular frequency (Hz)
+ * @param mz_val m/z value (Da)
+ * @param lmco_val LMCO value (Da)
+ * @param max_mz_val Maximum m/z value (Da)
+ */
 void MathieuWindow::setOutputValues(double omega_val, double particle_mass_val,
                                     double mathieu_q_val, double mathieu_a_val, double beta_val,
                                     double secular_freq_val, double mz_val, double lmco_val,

@@ -1,5 +1,9 @@
+
 cmake_minimum_required(VERSION 3.5)
 project(trappable)
+
+set(CMAKE_SKIP_RPATH TRUE)
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
 
 add_subdirectory(mathieu_lib)
 add_subdirectory(gui)
@@ -13,7 +17,7 @@ if(BUILD_TESTS)
 
 	add_executable(test_mathieu tests/test_mathieu.cpp)
 	target_include_directories(test_mathieu PRIVATE ${CMAKE_SOURCE_DIR}/mathieu_lib/include)
-	target_link_libraries(test_mathieu mathieu_lib ${GTEST_LIBRARIES} pthread)
+	target_link_libraries(test_mathieu mathieu_lib gtest gtest_main pthread)
 	add_test(NAME test_mathieu COMMAND test_mathieu)
 
 	# GUI E2E test

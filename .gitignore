@@ -13,6 +13,7 @@
 *.dylib
 
 # Qt build and meta-object files
+.qt/*
 *.moc
 moc_*.cpp
 moc_*.h

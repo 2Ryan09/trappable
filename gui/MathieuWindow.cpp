@@ -13,6 +13,7 @@
 constexpr double MAX_Q = 0.908;
 
 MathieuWindow::MathieuWindow(QWidget* parent) : QWidget(parent) {
+    setWindowTitle("Mathieu Quadrupole Stability Calculator");
     // Use a horizontal layout: left = inputs/results, right = plot
     auto* mainLayout = new QHBoxLayout(this);
 
@@ -56,6 +57,12 @@ MathieuWindow::MathieuWindow(QWidget* parent) : QWidget(parent) {
     calcButton = new QPushButton("Calculate");
     calcButton->setObjectName("calcButton");
     leftLayout->addWidget(calcButton);
+
+    // Add horizontal separator)
+    QFrame* separator = new QFrame;
+    separator->setFrameShape(QFrame::HLine);
+    separator->setFrameShadow(QFrame::Sunken);
+    leftLayout->addWidget(separator);
 
     QGridLayout* outputLayout = new QGridLayout;
     int row = 0;
@@ -122,9 +129,34 @@ MathieuWindow::MathieuWindow(QWidget* parent) : QWidget(parent) {
     stabilityPlotWidget = new QCustomPlot(this);
     stabilityPlotWidget->setMinimumWidth(600);
     stabilityPlotWidget->setMinimumHeight(400);
+    stabilityPlotWidget->setBackground(Qt::transparent);
+    // Add axes on the right and top
+    QCPAxis* rightAxis = stabilityPlotWidget->axisRect()->addAxis(QCPAxis::atRight);
+    QCPAxis* topAxis = stabilityPlotWidget->axisRect()->addAxis(QCPAxis::atTop);
+    rightAxis->setLabel("");
+    topAxis->setLabel("");
+    rightAxis->setTickLabels(false);
+    topAxis->setTickLabels(false);
     mainLayout->addWidget(stabilityPlotWidget, 1);  // right side, stretch factor 1
 
     stabilityPlotter = new StabilityRegionPlotter(stabilityPlotWidget);
+
+    // Add plot labels for stability regions
+    QCPItemText* stableLabel = new QCPItemText(stabilityPlotWidget);
+    stableLabel->setPositionAlignment(Qt::AlignCenter);
+    stableLabel->position->setType(QCPItemPosition::ptPlotCoords);
+    stableLabel->position->setCoords(0.65, 0.15);
+    stableLabel->setText("stable");
+    stableLabel->setFont(QFont(font().family(), 12, QFont::Bold));
+    stableLabel->setColor(Qt::darkGreen);
+
+    QCPItemText* unstableLabel = new QCPItemText(stabilityPlotWidget);
+    unstableLabel->setPositionAlignment(Qt::AlignCenter);
+    unstableLabel->position->setType(QCPItemPosition::ptPlotCoords);
+    unstableLabel->position->setCoords(0.1, 0.15);
+    unstableLabel->setText("unstable");
+    unstableLabel->setFont(QFont(font().family(), 12, QFont::Bold));
+    unstableLabel->setColor(Qt::red);
 
     connect(calcButton, &QPushButton::clicked, this, [this]() {
         bool ok_freq = false, ok_radius = false, ok_mass = false, ok_voltage_rf = false,

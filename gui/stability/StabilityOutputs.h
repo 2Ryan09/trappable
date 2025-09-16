@@ -13,10 +13,23 @@ class StabilityOutputs : public QWidget {
     void setVoltageDiff(double value);
     void setResolution(double value);
 
+    // New advanced metrics
+    void setDeltaQ(double value);
+    void setDeltaE(double value);
+    void setTheta(double value);
+    void setSNorm(double value);
+    void setDeltaMin(double value);
+
    private:
     QLabel* deltaALabel;
     QLabel* voltageDiffLabel;
     QLabel* resolutionLabel;
+
+    QLabel* deltaQLabel;
+    QLabel* deltaELabel;
+    QLabel* thetaLabel;
+    QLabel* sNormLabel;
+    QLabel* deltaMinLabel;
 };
 
 #endif  // STABILITYOUTPUTS_H

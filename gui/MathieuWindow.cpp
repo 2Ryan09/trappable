@@ -11,8 +11,9 @@
 
 #include "Inputs.h"
 #include "Outputs.h"
-#include "StabilityOutputs.h"
 #include "mathieu_lib/mathieu.h"
+#include "stability/StabilityCalculator.h"
+#include "stability/StabilityOutputs.h"
 
 /**
  * @class MathieuWindow
@@ -182,15 +183,32 @@ void MathieuWindow::handleCalculation() {
     stabilityPlotter->plotPoint(mathieu_q_val, mathieu_a_val);
 
     // Calculate and update stability outputs
-    double a_boundary = stabilityPlotter->calculateUpperBoundary(mathieu_q_val);
-    double delta_a = a_boundary - mathieu_a_val;
+    double a_boundary = StabilityCalculator::calculateUpperBoundary(mathieu_q_val);
+    double delta_a = StabilityCalculator::verticalDistance(mathieu_a_val, a_boundary);
+    double delta_q = StabilityCalculator::horizontalDistance(
+        mathieu_q_val, mathieu_q_val);  // For now, boundary q = operating q
+    double delta_e = StabilityCalculator::euclideanDistance(mathieu_a_val, a_boundary,
+                                                            mathieu_q_val, mathieu_q_val);
+    double theta =
+        StabilityCalculator::angularOffset(mathieu_a_val, a_boundary, mathieu_q_val, mathieu_q_val);
+    double s_norm = StabilityCalculator::normalizedStabilityMargin(mathieu_a_val, a_boundary,
+                                                                   mathieu_q_val, mathieu_q_val);
+    // For worst-case, just use single boundary for now
+    double delta_min = delta_e;
+
     constexpr double e_charge = 1.602176634e-19;
     double voltage_diff =
         delta_a *
         (particle_mass_val * calcInputs.radius * calcInputs.radius * omega_val * omega_val) /
         (2.0 * e_charge * calcInputs.charge_state);
     double resolution = (mathieu_a_val != 0.0) ? delta_a / std::abs(mathieu_a_val) : 0.0;
+
     stabilityOutputs->setDeltaA(delta_a);
+    stabilityOutputs->setDeltaQ(delta_q);
+    stabilityOutputs->setDeltaE(delta_e);
+    stabilityOutputs->setTheta(theta);
+    stabilityOutputs->setSNorm(s_norm);
+    stabilityOutputs->setDeltaMin(delta_min);
     stabilityOutputs->setVoltageDiff(voltage_diff);
     stabilityOutputs->setResolution(resolution);
     stabilityPlotter->drawVerticalDistance(mathieu_q_val, mathieu_a_val, a_boundary);

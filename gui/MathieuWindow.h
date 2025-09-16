@@ -9,8 +9,8 @@
 
 #include "Inputs.h"
 #include "Outputs.h"
-#include "StabilityOutputs.h"
 #include "plot/StabilityRegionPlotter.h"
+#include "stability/StabilityOutputs.h"
 
 namespace trappable {
 

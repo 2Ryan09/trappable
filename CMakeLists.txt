@@ -52,9 +52,9 @@ if(BUILD_TESTS)
 
 	# GUI E2E test
 	find_package(Qt6 COMPONENTS Widgets PrintSupport Test REQUIRED)
-	add_executable(test_mathieu_e2e tests/test_mathieu_e2e.cpp gui/MathieuWindow.cpp gui/StabilityOutputs.cpp gui/Inputs.cpp gui/Inputs.h gui/Outputs.cpp gui/Outputs.h gui/plot/StabilityRegionPlotter.cpp)
+	add_executable(test_mathieu_e2e tests/test_mathieu_e2e.cpp gui/MathieuWindow.cpp gui/stability/StabilityOutputs.cpp gui/Inputs.cpp gui/Inputs.h gui/Outputs.cpp gui/Outputs.h gui/plot/StabilityRegionPlotter.cpp)
 	target_include_directories(test_mathieu_e2e PRIVATE ${CMAKE_SOURCE_DIR}/gui ${CMAKE_SOURCE_DIR}/gui/plot ${CMAKE_SOURCE_DIR}/gui/plot/QCustomPlot ${CMAKE_SOURCE_DIR}/mathieu_lib/include)
-	target_link_libraries(test_mathieu_e2e PRIVATE Qt6::Widgets Qt6::PrintSupport Qt6::Test mathieu_lib qcustomplot)
+	target_link_libraries(test_mathieu_e2e PRIVATE Qt6::Widgets Qt6::PrintSupport Qt6::Test mathieu_lib qcustomplot stability)
 	add_test(NAME test_mathieu_e2e COMMAND test_mathieu_e2e)
 endif()
 

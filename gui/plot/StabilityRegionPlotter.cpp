@@ -6,6 +6,7 @@
 #include <QtMath>
 
 #include "QCustomPlot/qcustomplot.h"
+#include "stability/StabilityCalculator.h"
 
 StabilityRegionPlotter::StabilityRegionPlotter(QCustomPlot* plot)
     : m_plot(plot), m_pointGraph(nullptr) {
@@ -19,7 +20,7 @@ void StabilityRegionPlotter::setupStabilityRegion(QCustomPlot* customPlot) {
     int numPoints = 500;
     for (int i = 0; i <= numPoints; ++i) {
         double q = 0.908 * i / numPoints;
-        double a = calculateUpperBoundary(q);
+        double a = StabilityCalculator::calculateUpperBoundary(q);
         q_values.append(q);
         a_values.append(a);
     }
@@ -44,21 +45,7 @@ void StabilityRegionPlotter::setupStabilityRegion(QCustomPlot* customPlot) {
     customPlot->replot();
 }
 
-double StabilityRegionPlotter::calculateUpperBoundary(double q) {
-    if (q <= 0.4) {
-        return (q * q / 2.0) - (7.0 * qPow(q, 4) / 128.0);
-    } else if (q <= 0.706) {
-        return (q * q / 2.0) - (7.0 * qPow(q, 4) / 128.0) + (29.0 * qPow(q, 6) / 2304.0) -
-               (68687.0 * qPow(q, 8) / 18874368.0);
-    } else if (q <= 0.908) {
-        double q0 = 0.706;
-        double a0 = (q0 * q0 / 2.0) - (7.0 * qPow(q0, 4) / 128.0) + (29.0 * qPow(q0, 6) / 2304.0) -
-                    (68687.0 * qPow(q0, 8) / 18874368.0);
-        double t = (q - q0) / (0.908 - q0);
-        return a0 * (1.0 - t);
-    }
-    return 0.0;
-}
+// Removed: now using StabilityCalculator::calculateUpperBoundary
 
 void StabilityRegionPlotter::plotPoint(double q, double a) {
     if (!m_plot)

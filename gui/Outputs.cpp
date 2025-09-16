@@ -4,63 +4,69 @@
 #include <cmath>
 
 Outputs::Outputs(QWidget* parent) : QWidget(parent) {
-    auto* group = new QGroupBox("Outputs", this);
-    QFont titleFont = group->font();
-    titleFont.setBold(true);
-    group->setFont(titleFont);
-    auto* layout = new QGridLayout(group);
+    auto* layout = new QGridLayout(this);
+
     int row = 0;
-    omegaValueLabel = new QLabel("", this);
+    omegaValueLabel = new QLabel("-", this);
     omegaUnitLabel = new QLabel("Hz", this);
-    layout->addWidget(new QLabel("Omega:"), row, 0);
+    auto* omegaLabel = new QLabel("Omega:");
+    layout->addWidget(omegaLabel, row, 0);
     layout->addWidget(omegaValueLabel, row, 1);
     layout->addWidget(omegaUnitLabel, row++, 2);
 
-    particleMassValueLabel = new QLabel("", this);
+    particleMassValueLabel = new QLabel("-", this);
     particleMassUnitLabel = new QLabel("kg", this);
-    layout->addWidget(new QLabel("Particle mass:"), row, 0);
+    auto* massLabel = new QLabel("Particle mass:");
+    layout->addWidget(massLabel, row, 0);
     layout->addWidget(particleMassValueLabel, row, 1);
     layout->addWidget(particleMassUnitLabel, row++, 2);
 
-    mathieuQValueLabel = new QLabel("", this);
+    mathieuQValueLabel = new QLabel("-", this);
     mathieuQUnitLabel = new QLabel("", this);
-    layout->addWidget(new QLabel("Mathieu q:"), row, 0);
+    auto* qLabel = new QLabel("Mathieu q:");
+    layout->addWidget(qLabel, row, 0);
     layout->addWidget(mathieuQValueLabel, row, 1);
     layout->addWidget(mathieuQUnitLabel, row++, 2);
 
-    mathieuAValueLabel = new QLabel("", this);
+    mathieuAValueLabel = new QLabel("-", this);
     mathieuAUnitLabel = new QLabel("", this);
-    layout->addWidget(new QLabel("Mathieu a:"), row, 0);
+    auto* aLabel = new QLabel("Mathieu a:");
+    layout->addWidget(aLabel, row, 0);
     layout->addWidget(mathieuAValueLabel, row, 1);
     layout->addWidget(mathieuAUnitLabel, row++, 2);
 
-    betaValueLabel = new QLabel("", this);
+    betaValueLabel = new QLabel("-", this);
     betaUnitLabel = new QLabel("", this);
-    layout->addWidget(new QLabel("Beta:"), row, 0);
+    auto* betaLabel = new QLabel("Beta:");
+    layout->addWidget(betaLabel, row, 0);
     layout->addWidget(betaValueLabel, row, 1);
     layout->addWidget(betaUnitLabel, row++, 2);
 
-    secularFrequencyValueLabel = new QLabel("", this);
+    secularFrequencyValueLabel = new QLabel("-", this);
     secularFrequencyUnitLabel = new QLabel("Hz", this);
-    layout->addWidget(new QLabel("Secular frequency:"), row, 0);
+    auto* secFreqLabel = new QLabel("Secular frequency:");
+    layout->addWidget(secFreqLabel, row, 0);
     layout->addWidget(secularFrequencyValueLabel, row, 1);
     layout->addWidget(secularFrequencyUnitLabel, row++, 2);
 
-    mzValueLabel = new QLabel("", this);
+    mzValueLabel = new QLabel("-", this);
     mzUnitLabel = new QLabel("Da", this);
-    layout->addWidget(new QLabel("m/z:"), row, 0);
+    auto* mzLabel = new QLabel("m/z:");
+    layout->addWidget(mzLabel, row, 0);
     layout->addWidget(mzValueLabel, row, 1);
     layout->addWidget(mzUnitLabel, row++, 2);
 
-    lmcoValueLabel = new QLabel("", this);
+    lmcoValueLabel = new QLabel("-", this);
     lmcoUnitLabel = new QLabel("Da", this);
-    layout->addWidget(new QLabel("LMCO:"), row, 0);
+    auto* lmcoLabel = new QLabel("LMCO:");
+    layout->addWidget(lmcoLabel, row, 0);
     layout->addWidget(lmcoValueLabel, row, 1);
     layout->addWidget(lmcoUnitLabel, row++, 2);
 
-    maxMzValueLabel = new QLabel("", this);
+    maxMzValueLabel = new QLabel("-", this);
     maxMzUnitLabel = new QLabel("Da", this);
-    layout->addWidget(new QLabel("Max m/z:"), row, 0);
+    auto* maxMzLabel = new QLabel("Max m/z:");
+    layout->addWidget(maxMzLabel, row, 0);
     layout->addWidget(maxMzValueLabel, row, 1);
     layout->addWidget(maxMzUnitLabel, row++, 2);
 
@@ -68,15 +74,15 @@ Outputs::Outputs(QWidget* parent) : QWidget(parent) {
 }
 
 void Outputs::setInvalid() {
-    omegaValueLabel->setText("Invalid");
-    particleMassValueLabel->setText("Invalid");
-    mathieuQValueLabel->setText("Invalid");
-    mathieuAValueLabel->setText("Invalid");
-    betaValueLabel->setText("Invalid");
-    secularFrequencyValueLabel->setText("Invalid");
-    mzValueLabel->setText("Invalid");
-    lmcoValueLabel->setText("Invalid");
-    maxMzValueLabel->setText("Invalid");
+    omegaValueLabel->setText("-");
+    particleMassValueLabel->setText("-");
+    mathieuQValueLabel->setText("-");
+    mathieuAValueLabel->setText("-");
+    betaValueLabel->setText("-");
+    secularFrequencyValueLabel->setText("-");
+    mzValueLabel->setText("-");
+    lmcoValueLabel->setText("-");
+    maxMzValueLabel->setText("-");
 }
 
 void Outputs::setValues(double omega_val, double particle_mass_val, double mathieu_q_val,

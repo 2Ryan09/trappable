@@ -4,11 +4,7 @@
 #include <QIntValidator>
 
 Inputs::Inputs(QWidget* parent) : QWidget(parent) {
-    auto* group = new QGroupBox("Inputs", this);
-    QFont titleFont = group->font();
-    titleFont.setBold(true);
-    group->setFont(titleFont);
-    auto* layout = new QGridLayout(group);
+    auto* layout = new QGridLayout(this);
 
     auto makeLineEdit = [](const char* name) {
         auto* edit = new QLineEdit;
@@ -69,26 +65,34 @@ Inputs::Inputs(QWidget* parent) : QWidget(parent) {
     chargeStateEdit->setValidator(new QIntValidator(1, 100, chargeStateEdit));
 
     int inputRow = 0;
-    layout->addWidget(new QLabel("Frequency:"), inputRow, 0);
+    auto* freqLabel = new QLabel("Frequency:");
+    layout->addWidget(freqLabel, inputRow, 0);
     layout->addWidget(frequencyEdit, inputRow, 1);
     layout->addWidget(frequencyUnitWidget, inputRow++, 2);
-    layout->addWidget(new QLabel("Quadrupole radius:"), inputRow, 0);
+    auto* radiusLabel = new QLabel("Quadrupole radius:");
+    layout->addWidget(radiusLabel, inputRow, 0);
     layout->addWidget(radiusEdit, inputRow, 1);
     layout->addWidget(radiusUnitWidget, inputRow++, 2);
-    layout->addWidget(new QLabel("Molar mass:"), inputRow, 0);
+    auto* massLabel = new QLabel("Molar mass:");
+    layout->addWidget(massLabel, inputRow, 0);
     layout->addWidget(massEdit, inputRow, 1);
     layout->addWidget(massUnitWidget, inputRow++, 2);
-    layout->addWidget(new QLabel("RF Voltage:"), inputRow, 0);
+    auto* rfLabel = new QLabel("RF Voltage:");
+    layout->addWidget(rfLabel, inputRow, 0);
     layout->addWidget(voltageRfEdit, inputRow, 1);
     layout->addWidget(voltageRfUnitWidget, inputRow++, 2);
-    layout->addWidget(new QLabel("RF Voltage (max):"), inputRow, 0);
+    auto* rfMaxLabel = new QLabel("RF Voltage (max):");
+    layout->addWidget(rfMaxLabel, inputRow, 0);
     layout->addWidget(voltageRfMaxEdit, inputRow, 1);
     layout->addWidget(voltageRfMaxUnitWidget, inputRow++, 2);
-    layout->addWidget(new QLabel("DC Voltage:"), inputRow, 0);
+    auto* dcLabel = new QLabel("DC Voltage:");
+    layout->addWidget(dcLabel, inputRow, 0);
     layout->addWidget(voltageDcEdit, inputRow, 1);
     layout->addWidget(voltageDcUnitWidget, inputRow++, 2);
-    layout->addWidget(new QLabel("Charge state:"), inputRow, 0);
+    auto* chargeLabel = new QLabel("Charge state:");
+    layout->addWidget(chargeLabel, inputRow, 0);
     layout->addWidget(chargeStateEdit, inputRow, 1);
+
     setLayout(layout);
 }
 

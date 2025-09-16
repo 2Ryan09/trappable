@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake g++ qt6-base-dev qt6-base-private-dev qt6-tools-dev qt6-tools-dev-tools libgtest-dev
+          cd /usr/src/googletest/googletest
+          sudo cmake -DBUILD_SHARED_LIBS=ON .
+          sudo make
+          sudo cp lib/libgtest*.so /usr/lib/
+          sudo ldconfig
+      - name: Configure CMake
+        run: cmake .
+      - name: Build
+        run: make -j$(nproc)
+      - name: Run tests
+        run: ctest --output-on-failure

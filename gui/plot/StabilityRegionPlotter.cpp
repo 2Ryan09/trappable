@@ -60,15 +60,11 @@ double StabilityRegionPlotter::calculateUpperBoundary(double q) {
 void StabilityRegionPlotter::plotPoint(double q, double a) {
     if (!m_plot)
         return;
-    if (m_pointGraph) {
-        m_plot->removeGraph(m_pointGraph);
-        m_pointGraph = nullptr;
-    }
-    // Add new point graph
-    m_pointGraph = m_plot->addGraph();
-    m_pointGraph->setLineStyle(QCPGraph::lsNone);
-    m_pointGraph->setScatterStyle(
+    // Always append a new graph for each point
+    QCPGraph* pointGraph = m_plot->addGraph();
+    pointGraph->setLineStyle(QCPGraph::lsNone);
+    pointGraph->setScatterStyle(
         QCPScatterStyle(QCPScatterStyle::ssCircle, QPen(Qt::red), QBrush(Qt::red), 16));
-    m_pointGraph->addData(q, a);
+    pointGraph->addData(q, a);
     m_plot->replot();
 }

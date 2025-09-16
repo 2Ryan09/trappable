@@ -32,8 +32,9 @@ if(BUILD_TESTS)
 	enable_testing()
 	find_package(GTest REQUIRED)
 	# Ensure libgtest.so is found at runtime
+
 	add_executable(test_mathieu tests/test_mathieu.cpp)
-	target_include_directories(test_mathieu PRIVATE ${CMAKE_SOURCE_DIR}/mathieu_lib/include)
+	target_include_directories(test_mathieu PRIVATE ${CMAKE_SOURCE_DIR}/mathieu_lib/include ${CMAKE_SOURCE_DIR}/gui ${CMAKE_SOURCE_DIR}/gui/plot)
 	target_link_libraries(test_mathieu PRIVATE mathieu_lib GTest::gtest GTest::gtest_main pthread)
 	set_target_properties(test_mathieu PROPERTIES
 		INSTALL_RPATH "$ORIGIN:/usr/lib:/usr/lib/x86_64-linux-gnu:/usr/local/lib"
@@ -41,12 +42,32 @@ if(BUILD_TESTS)
 	)
 	add_test(NAME test_mathieu COMMAND test_mathieu)
 
+	# Vectorized mathieu_lib tests
+	add_executable(test_mathieu_vector tests/test_mathieu_vector.cpp)
+	target_include_directories(test_mathieu_vector PRIVATE ${CMAKE_SOURCE_DIR}/mathieu_lib/include ${CMAKE_SOURCE_DIR}/gui ${CMAKE_SOURCE_DIR}/gui/plot)
+	target_link_libraries(test_mathieu_vector PRIVATE mathieu_lib GTest::gtest GTest::gtest_main pthread)
+	set_target_properties(test_mathieu_vector PROPERTIES
+		INSTALL_RPATH "$ORIGIN:/usr/lib:/usr/lib/x86_64-linux-gnu:/usr/local/lib"
+		BUILD_WITH_INSTALL_RPATH ON
+	)
+	add_test(NAME test_mathieu_vector COMMAND test_mathieu_vector)
+
 	# GUI E2E test
 	find_package(Qt6 COMPONENTS Widgets PrintSupport Test REQUIRED)
 	add_executable(test_mathieu_e2e tests/test_mathieu_e2e.cpp gui/MathieuWindow.cpp gui/plot/StabilityRegionPlotter.cpp)
-	target_include_directories(test_mathieu_e2e PRIVATE ${PROJECT_SOURCE_DIR}/gui ${PROJECT_SOURCE_DIR}/gui/plot ${PROJECT_SOURCE_DIR}/gui/plot/QCustomPlot ${PROJECT_SOURCE_DIR}/mathieu_lib/include)
+	target_include_directories(test_mathieu_e2e PRIVATE ${CMAKE_SOURCE_DIR}/gui ${CMAKE_SOURCE_DIR}/gui/plot ${CMAKE_SOURCE_DIR}/gui/plot/QCustomPlot ${CMAKE_SOURCE_DIR}/mathieu_lib/include)
 	target_link_libraries(test_mathieu_e2e PRIVATE Qt6::Widgets Qt6::PrintSupport Qt6::Test mathieu_lib qcustomplot)
 	add_test(NAME test_mathieu_e2e COMMAND test_mathieu_e2e)
+
+	# GUI widget/unit tests
+	add_executable(test_mathieuwindow_gui tests/test_mathieuwindow_gui.cpp gui/MathieuWindow.cpp gui/plot/StabilityRegionPlotter.cpp)
+	target_include_directories(test_mathieuwindow_gui PRIVATE ${CMAKE_SOURCE_DIR}/gui ${CMAKE_SOURCE_DIR}/gui/plot ${CMAKE_SOURCE_DIR}/gui/plot/QCustomPlot ${CMAKE_SOURCE_DIR}/mathieu_lib/include)
+	target_link_libraries(test_mathieuwindow_gui PRIVATE Qt6::Widgets Qt6::PrintSupport Qt6::Test mathieu_lib qcustomplot GTest::gtest GTest::gtest_main pthread)
+	set_target_properties(test_mathieuwindow_gui PROPERTIES
+		INSTALL_RPATH "$ORIGIN:/usr/lib:/usr/lib/x86_64-linux-gnu:/usr/local/lib"
+		BUILD_WITH_INSTALL_RPATH ON
+	)
+	add_test(NAME test_mathieuwindow_gui COMMAND test_mathieuwindow_gui)
 endif()
 
 # Install rules

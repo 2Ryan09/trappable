@@ -96,55 +96,55 @@ MathieuWindow::MathieuWindow(QWidget* parent) : QWidget(parent) {
     auto* outputGroup = new QGroupBox(QStringLiteral("Outputs"), leftWidget);
     auto* outputLayout = new QGridLayout(outputGroup);
     int row = 0;
-    omegaValueLabel = new QLabel(leftWidget);
+    omegaValueLabel = new QLabel(QStringLiteral(""), leftWidget);
     omegaUnitLabel = new QLabel(QStringLiteral("Hz"), leftWidget);
     outputLayout->addWidget(new QLabel(QStringLiteral("Omega:")), row, 0);
     outputLayout->addWidget(omegaValueLabel, row, 1);
     outputLayout->addWidget(omegaUnitLabel, row++, 2);
 
-    particleMassValueLabel = new QLabel(leftWidget);
+    particleMassValueLabel = new QLabel(QStringLiteral(""), leftWidget);
     particleMassUnitLabel = new QLabel(QStringLiteral("kg"), leftWidget);
     outputLayout->addWidget(new QLabel(QStringLiteral("Particle mass:")), row, 0);
     outputLayout->addWidget(particleMassValueLabel, row, 1);
     outputLayout->addWidget(particleMassUnitLabel, row++, 2);
 
-    mathieuQValueLabel = new QLabel(leftWidget);
+    mathieuQValueLabel = new QLabel(QStringLiteral(""), leftWidget);
     mathieuQUnitLabel = new QLabel(QStringLiteral(""), leftWidget);
     outputLayout->addWidget(new QLabel(QStringLiteral("Mathieu q:")), row, 0);
     outputLayout->addWidget(mathieuQValueLabel, row, 1);
     outputLayout->addWidget(mathieuQUnitLabel, row++, 2);
 
-    mathieuAValueLabel = new QLabel(leftWidget);
+    mathieuAValueLabel = new QLabel(QStringLiteral(""), leftWidget);
     mathieuAUnitLabel = new QLabel(QStringLiteral(""), leftWidget);
     outputLayout->addWidget(new QLabel(QStringLiteral("Mathieu a:")), row, 0);
     outputLayout->addWidget(mathieuAValueLabel, row, 1);
     outputLayout->addWidget(mathieuAUnitLabel, row++, 2);
 
-    betaValueLabel = new QLabel(leftWidget);
+    betaValueLabel = new QLabel(QStringLiteral(""), leftWidget);
     betaUnitLabel = new QLabel(QStringLiteral(""), leftWidget);
     outputLayout->addWidget(new QLabel(QStringLiteral("Beta:")), row, 0);
     outputLayout->addWidget(betaValueLabel, row, 1);
     outputLayout->addWidget(betaUnitLabel, row++, 2);
 
-    secularFrequencyValueLabel = new QLabel(leftWidget);
+    secularFrequencyValueLabel = new QLabel(QStringLiteral(""), leftWidget);
     secularFrequencyUnitLabel = new QLabel(QStringLiteral("Hz"), leftWidget);
     outputLayout->addWidget(new QLabel(QStringLiteral("Secular frequency:")), row, 0);
     outputLayout->addWidget(secularFrequencyValueLabel, row, 1);
     outputLayout->addWidget(secularFrequencyUnitLabel, row++, 2);
 
-    mzValueLabel = new QLabel(leftWidget);
+    mzValueLabel = new QLabel(QStringLiteral(""), leftWidget);
     mzUnitLabel = new QLabel(QStringLiteral("Da"), leftWidget);
     outputLayout->addWidget(new QLabel(QStringLiteral("m/z:")), row, 0);
     outputLayout->addWidget(mzValueLabel, row, 1);
     outputLayout->addWidget(mzUnitLabel, row++, 2);
 
-    lmcoValueLabel = new QLabel(leftWidget);
+    lmcoValueLabel = new QLabel(QStringLiteral(""), leftWidget);
     lmcoUnitLabel = new QLabel(QStringLiteral("Da"), leftWidget);
     outputLayout->addWidget(new QLabel(QStringLiteral("LMCO:")), row, 0);
     outputLayout->addWidget(lmcoValueLabel, row, 1);
     outputLayout->addWidget(lmcoUnitLabel, row++, 2);
 
-    maxMzValueLabel = new QLabel(leftWidget);
+    maxMzValueLabel = new QLabel(QStringLiteral(""), leftWidget);
     maxMzUnitLabel = new QLabel(QStringLiteral("Da"), leftWidget);
     outputLayout->addWidget(new QLabel(QStringLiteral("Max m/z:")), row, 0);
     outputLayout->addWidget(maxMzValueLabel, row, 1);

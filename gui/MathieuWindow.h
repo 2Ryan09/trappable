@@ -6,7 +6,7 @@ class QLineEdit;
 class QPushButton;
 class QLabel;
 
-#include "plot/MathieuStabilityPlot.h"
+#include "plot/StabilityRegionPlotter.h"
 
 class MathieuWindow : public QWidget {
    public:
@@ -23,5 +23,6 @@ class MathieuWindow : public QWidget {
     QPushButton* calcButton;
     QLabel* resultLabel;
 
-    MathieuStabilityPlot* stabilityPlot;
+    QCustomPlot* stabilityPlotWidget;
+    StabilityRegionPlotter* stabilityPlotter;
 };

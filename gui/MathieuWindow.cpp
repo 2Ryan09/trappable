@@ -13,7 +13,12 @@
 constexpr double MAX_Q = 0.908;
 
 MathieuWindow::MathieuWindow(QWidget* parent) : QWidget(parent) {
-    auto* mainLayout = new QVBoxLayout(this);
+    // Use a horizontal layout: left = inputs/results, right = plot
+    auto* mainLayout = new QHBoxLayout(this);
+
+    // Left side: inputs and outputs
+    auto* leftWidget = new QWidget(this);
+    auto* leftLayout = new QVBoxLayout(leftWidget);
     auto* formLayout = new QFormLayout;
 
     frequencyEdit = new QLineEdit;
@@ -46,19 +51,26 @@ MathieuWindow::MathieuWindow(QWidget* parent) : QWidget(parent) {
     formLayout->addRow("RF Voltage (max, V):", voltageRfMaxEdit);
     formLayout->addRow("DC Voltage (V):", voltageDcEdit);
     formLayout->addRow("Charge state:", chargeStateEdit);
-    mainLayout->addLayout(formLayout);
+    leftLayout->addLayout(formLayout);
 
     calcButton = new QPushButton("Calculate");
     calcButton->setObjectName("calcButton");
-    mainLayout->addWidget(calcButton);
+    leftLayout->addWidget(calcButton);
 
     resultLabel = new QLabel;
     resultLabel->setObjectName("resultLabel");
-    mainLayout->addWidget(resultLabel);
+    leftLayout->addWidget(resultLabel);
 
-    // Add the stability plot widget
-    stabilityPlot = new MathieuStabilityPlot(this);
-    mainLayout->addWidget(stabilityPlot);
+    leftLayout->addStretch();
+    mainLayout->addWidget(leftWidget, 0);  // left side, stretch factor 0
+
+    // Right side: large stability plot
+    stabilityPlotWidget = new QCustomPlot(this);
+    stabilityPlotWidget->setMinimumWidth(600);
+    stabilityPlotWidget->setMinimumHeight(400);
+    mainLayout->addWidget(stabilityPlotWidget, 1);  // right side, stretch factor 1
+
+    stabilityPlotter = new StabilityRegionPlotter(stabilityPlotWidget);
 
     connect(calcButton, &QPushButton::clicked, this, [this]() {
         bool ok_freq = false, ok_radius = false, ok_mass = false, ok_voltage_rf = false,

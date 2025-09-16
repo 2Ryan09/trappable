@@ -28,36 +28,26 @@ void GuiE2ETest::test_all_inputs_and_outputs() {
     // Simulate button click
     QTest::mouseClick(w.calcButton, Qt::LeftButton);
 
-    // Extract and compare individual values
-    QString output = w.resultLabel->text();
-
-    QRegularExpression re_omega("omega: ([0-9.eE+-]+)");
-    QRegularExpression re_mass("particle_mass: ([0-9.eE+-]+)");
-    QRegularExpression re_q("mathieu_q: ([0-9.eE+-]+)");
-    QRegularExpression re_a("mathieu_a: ([0-9.eE+-]+)");
-    QRegularExpression re_beta("beta: ([0-9.eE+-]+)");
-    QRegularExpression re_secular("secular_frequency: ([0-9.eE+-]+)");
-    QRegularExpression re_mz("m/z: ([0-9.eE+-]+)");
-    QRegularExpression re_lmco("lmco: ([0-9.eE+-]+)");
-    QRegularExpression re_maxmz("max_mz: ([0-9.eE+-]+)");
-
-    auto extract = [](const QString &text, const QRegularExpression &re) -> double {
-        auto match = re.match(text);
-        if (match.hasMatch()) {
-            return match.captured(1).toDouble();
+    // Extract and compare individual values from output labels
+    auto extract = [](const QString &text, const QString &prefix) -> double {
+        QString pattern = prefix + ": ";
+        int idx = text.indexOf(pattern);
+        if (idx != -1) {
+            QString value = text.mid(idx + pattern.length());
+            return value.toDouble();
         }
         return std::numeric_limits<double>::quiet_NaN();
     };
 
-    double omega = extract(output, re_omega);
-    double particle_mass = extract(output, re_mass);
-    double mathieu_q = extract(output, re_q);
-    double mathieu_a = extract(output, re_a);
-    double beta = extract(output, re_beta);
-    double secular_frequency = extract(output, re_secular);
-    double mz = extract(output, re_mz);
-    double lmco = extract(output, re_lmco);
-    double max_mz = extract(output, re_maxmz);
+    double omega = extract(w.omegaValueLabel->text(), "omega");
+    double particle_mass = extract(w.particleMassValueLabel->text(), "particle_mass");
+    double mathieu_q = extract(w.mathieuQValueLabel->text(), "mathieu_q");
+    double mathieu_a = extract(w.mathieuAValueLabel->text(), "mathieu_a");
+    double beta = extract(w.betaValueLabel->text(), "beta");
+    double secular_frequency = extract(w.secularFrequencyValueLabel->text(), "secular_frequency");
+    double mz = extract(w.mzValueLabel->text(), "m/z");
+    double lmco = extract(w.lmcoValueLabel->text(), "lmco");
+    double max_mz = extract(w.maxMzValueLabel->text(), "max_mz");
 
     // Replace these with your established expected values
     double expected_omega = 6.095e6;

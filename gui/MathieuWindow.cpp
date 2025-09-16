@@ -57,9 +57,63 @@ MathieuWindow::MathieuWindow(QWidget* parent) : QWidget(parent) {
     calcButton->setObjectName("calcButton");
     leftLayout->addWidget(calcButton);
 
-    resultLabel = new QLabel;
-    resultLabel->setObjectName("resultLabel");
-    leftLayout->addWidget(resultLabel);
+    QGridLayout* outputLayout = new QGridLayout;
+    int row = 0;
+    omegaValueLabel = new QLabel;
+    omegaUnitLabel = new QLabel("Hz");
+    outputLayout->addWidget(new QLabel("Omega:"), row, 0);
+    outputLayout->addWidget(omegaValueLabel, row, 1);
+    outputLayout->addWidget(omegaUnitLabel, row++, 2);
+
+    particleMassValueLabel = new QLabel;
+    particleMassUnitLabel = new QLabel("kg");
+    outputLayout->addWidget(new QLabel("Particle mass:"), row, 0);
+    outputLayout->addWidget(particleMassValueLabel, row, 1);
+    outputLayout->addWidget(particleMassUnitLabel, row++, 2);
+
+    mathieuQValueLabel = new QLabel;
+    mathieuQUnitLabel = new QLabel("");
+    outputLayout->addWidget(new QLabel("Mathieu q:"), row, 0);
+    outputLayout->addWidget(mathieuQValueLabel, row, 1);
+    outputLayout->addWidget(mathieuQUnitLabel, row++, 2);
+
+    mathieuAValueLabel = new QLabel;
+    mathieuAUnitLabel = new QLabel("");
+    outputLayout->addWidget(new QLabel("Mathieu a:"), row, 0);
+    outputLayout->addWidget(mathieuAValueLabel, row, 1);
+    outputLayout->addWidget(mathieuAUnitLabel, row++, 2);
+
+    betaValueLabel = new QLabel;
+    betaUnitLabel = new QLabel("");
+    outputLayout->addWidget(new QLabel("Beta:"), row, 0);
+    outputLayout->addWidget(betaValueLabel, row, 1);
+    outputLayout->addWidget(betaUnitLabel, row++, 2);
+
+    secularFrequencyValueLabel = new QLabel;
+    secularFrequencyUnitLabel = new QLabel("Hz");
+    outputLayout->addWidget(new QLabel("Secular frequency:"), row, 0);
+    outputLayout->addWidget(secularFrequencyValueLabel, row, 1);
+    outputLayout->addWidget(secularFrequencyUnitLabel, row++, 2);
+
+    mzValueLabel = new QLabel;
+    mzUnitLabel = new QLabel("Da");
+    outputLayout->addWidget(new QLabel("m/z:"), row, 0);
+    outputLayout->addWidget(mzValueLabel, row, 1);
+    outputLayout->addWidget(mzUnitLabel, row++, 2);
+
+    lmcoValueLabel = new QLabel;
+    lmcoUnitLabel = new QLabel("Da");
+    outputLayout->addWidget(new QLabel("LMCO:"), row, 0);
+    outputLayout->addWidget(lmcoValueLabel, row, 1);
+    outputLayout->addWidget(lmcoUnitLabel, row++, 2);
+
+    maxMzValueLabel = new QLabel;
+    maxMzUnitLabel = new QLabel("Da");
+    outputLayout->addWidget(new QLabel("Max m/z:"), row, 0);
+    outputLayout->addWidget(maxMzValueLabel, row, 1);
+    outputLayout->addWidget(maxMzUnitLabel, row++, 2);
+
+    leftLayout->addLayout(outputLayout);
 
     leftLayout->addStretch();
     mainLayout->addWidget(leftWidget, 0);  // left side, stretch factor 0
@@ -84,7 +138,15 @@ MathieuWindow::MathieuWindow(QWidget* parent) : QWidget(parent) {
         int charge_state = chargeStateEdit->text().toInt(&ok_charge_state);
         if (!(ok_freq && ok_radius && ok_mass && ok_voltage_rf && ok_voltage_rf_max &&
               ok_voltage_dc && ok_charge_state)) {
-            resultLabel->setText("Please enter valid numbers for all fields.");
+            omegaValueLabel->setText("Invalid");
+            particleMassValueLabel->setText("Invalid");
+            mathieuQValueLabel->setText("Invalid");
+            mathieuAValueLabel->setText("Invalid");
+            betaValueLabel->setText("Invalid");
+            secularFrequencyValueLabel->setText("Invalid");
+            mzValueLabel->setText("Invalid");
+            lmcoValueLabel->setText("Invalid");
+            maxMzValueLabel->setText("Invalid");
             return;
         }
         mathieu_lib::QuadrupoleParams params(freq, radius, mass);
@@ -97,19 +159,23 @@ MathieuWindow::MathieuWindow(QWidget* parent) : QWidget(parent) {
         double mz_val = mathieu_lib::mz(voltage_rf, charge_state, params, mathieu_q_val);
         double lmco_val = mathieu_lib::lmco(voltage_rf, charge_state, params, MAX_Q);
         double max_mz_val = mathieu_lib::max_mz(voltage_rf_max, charge_state, params, MAX_Q);
-        const QString res = QString(
-                                "omega: %1\nparticle_mass: %2\nmathieu_q: %3\nmathieu_a: %4\nbeta: "
-                                "%5\nsecular_frequency: %6\nm/z: %7\nlmco: %8\nmax_mz: %9")
-                                .arg(omega_val)
-                                .arg(particle_mass_val)
-                                .arg(mathieu_q_val)
-                                .arg(mathieu_a_val)
-                                .arg(beta_val)
-                                .arg(secular_freq_val)
-                                .arg(mz_val)
-                                .arg(lmco_val)
-                                .arg(max_mz_val);
-        resultLabel->setText(res);
+        auto formatValue = [](double val) {
+            double absVal = std::abs(val);
+            if ((absVal > 0 && (absVal < 0.001 || absVal >= 10000))) {
+                return QString::number(val, 'e', 3);  // scientific notation, 3 decimals
+            } else {
+                return QString::number(val, 'f', 3);  // fixed, 3 decimals
+            }
+        };
+        omegaValueLabel->setText(formatValue(omega_val));
+        particleMassValueLabel->setText(formatValue(particle_mass_val));
+        mathieuQValueLabel->setText(formatValue(mathieu_q_val));
+        mathieuAValueLabel->setText(formatValue(mathieu_a_val));
+        betaValueLabel->setText(formatValue(beta_val));
+        secularFrequencyValueLabel->setText(formatValue(secular_freq_val));
+        mzValueLabel->setText(formatValue(mz_val));
+        lmcoValueLabel->setText(formatValue(lmco_val));
+        maxMzValueLabel->setText(formatValue(max_mz_val));
         // Plot the calculated Mathieu q and a on the stability plot
         stabilityPlotter->plotPoint(mathieu_q_val, mathieu_a_val);
     });

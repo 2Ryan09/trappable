@@ -21,7 +21,24 @@ class MathieuWindow : public QWidget {
     QLineEdit* voltageDcEdit;
     QLineEdit* chargeStateEdit;
     QPushButton* calcButton;
-    QLabel* resultLabel;
+    QLabel* omegaValueLabel;
+    QLabel* omegaUnitLabel;
+    QLabel* particleMassValueLabel;
+    QLabel* particleMassUnitLabel;
+    QLabel* mathieuQValueLabel;
+    QLabel* mathieuQUnitLabel;
+    QLabel* mathieuAValueLabel;
+    QLabel* mathieuAUnitLabel;
+    QLabel* betaValueLabel;
+    QLabel* betaUnitLabel;
+    QLabel* secularFrequencyValueLabel;
+    QLabel* secularFrequencyUnitLabel;
+    QLabel* mzValueLabel;
+    QLabel* mzUnitLabel;
+    QLabel* lmcoValueLabel;
+    QLabel* lmcoUnitLabel;
+    QLabel* maxMzValueLabel;
+    QLabel* maxMzUnitLabel;
 
     QCustomPlot* stabilityPlotWidget;
     StabilityRegionPlotter* stabilityPlotter;

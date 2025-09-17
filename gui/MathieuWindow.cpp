@@ -1,4 +1,3 @@
-
 #include "MathieuWindow.h"
 
 #include <QDoubleValidator>
@@ -24,8 +23,6 @@
  * delegated to mathieu_lib. UI is modular and follows Qt best practices.
  */
 namespace trappable {
-
-constexpr double MAX_Q = 0.908;
 
 /**
  * @brief Construct the main window and initialize all widgets, layouts, and connections.
@@ -183,8 +180,9 @@ void MathieuWindow::handleCalculation() {
     stabilityPlotter->plotPoint(mathieu_q_val, mathieu_a_val);
 
     // Check if point is inside the stable region
-    bool isStable = (mathieu_a_val >= 0.0 && mathieu_q_val >= 0.0 && mathieu_q_val <= MAX_Q &&
-                     mathieu_a_val <= StabilityCalculator::calculateUpperBoundary(mathieu_q_val));
+    bool isStable =
+        (mathieu_a_val >= 0.0 && mathieu_q_val >= 0.0 && mathieu_q_val <= mathieu_lib::MAX_Q &&
+         mathieu_a_val <= StabilityCalculator::calculateUpperBoundary(mathieu_q_val));
     if (!isStable) {
         stabilityOutputs->setWarning(
             "Warning: The operating point is OUTSIDE the stable region! No stability metrics are "

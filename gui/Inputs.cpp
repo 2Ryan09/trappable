@@ -26,30 +26,35 @@ Inputs::Inputs(QWidget* parent) : QWidget(parent) {
 
     frequencyEdit = makeLineEdit("frequencyEdit");
     frequencyEdit->setValidator(new QDoubleValidator(0, 1e12, 6, frequencyEdit));
+    frequencyEdit->setText("970000");  // Default frequency in Hz
     auto [frequencyUnitHz, frequencyUnitKHz, frequencyUnitWidget] = makeUnitRadios("Hz", "kHz");
     this->frequencyUnitHz = frequencyUnitHz;
     this->frequencyUnitKHz = frequencyUnitKHz;
 
     radiusEdit = makeLineEdit("radiusEdit");
     radiusEdit->setValidator(new QDoubleValidator(0, 1e6, 6, radiusEdit));
+    radiusEdit->setText("0.003478");  // Default radius in m
     auto [radiusUnitM, radiusUnitMM, radiusUnitWidget] = makeUnitRadios("m", "mm");
     this->radiusUnitM = radiusUnitM;
     this->radiusUnitMM = radiusUnitMM;
 
     massEdit = makeLineEdit("massEdit");
     massEdit->setValidator(new QDoubleValidator(0, 1e6, 6, massEdit));
+    massEdit->setText("0.303");  // Default mass in kg
     auto [massUnitKg, massUnitG, massUnitWidget] = makeUnitRadios("kg", "g");
     this->massUnitKg = massUnitKg;
     this->massUnitG = massUnitG;
 
     voltageRfEdit = makeLineEdit("voltageRfEdit");
     voltageRfEdit->setValidator(new QDoubleValidator(-1e6, 1e6, 6, voltageRfEdit));
+    voltageRfEdit->setText("150");  // Default RF voltage in V
     auto [voltageRfUnitV, voltageRfUnitMV, voltageRfUnitWidget] = makeUnitRadios("V", "mV");
     this->voltageRfUnitV = voltageRfUnitV;
     this->voltageRfUnitMV = voltageRfUnitMV;
 
     voltageRfMaxEdit = makeLineEdit("voltageRfMaxEdit");
     voltageRfMaxEdit->setValidator(new QDoubleValidator(-1e6, 1e6, 6, voltageRfMaxEdit));
+    voltageRfMaxEdit->setText("3000");  // Default max RF voltage in V
     auto [voltageRfMaxUnitV, voltageRfMaxUnitMV, voltageRfMaxUnitWidget] =
         makeUnitRadios("V", "mV");
     this->voltageRfMaxUnitV = voltageRfMaxUnitV;
@@ -57,12 +62,14 @@ Inputs::Inputs(QWidget* parent) : QWidget(parent) {
 
     voltageDcEdit = makeLineEdit("voltageDcEdit");
     voltageDcEdit->setValidator(new QDoubleValidator(-1e6, 1e6, 6, voltageDcEdit));
+    voltageDcEdit->setText("0");  // Default DC voltage in V
     auto [voltageDcUnitV, voltageDcUnitMV, voltageDcUnitWidget] = makeUnitRadios("V", "mV");
     this->voltageDcUnitV = voltageDcUnitV;
     this->voltageDcUnitMV = voltageDcUnitMV;
 
     chargeStateEdit = makeLineEdit("chargeStateEdit");
     chargeStateEdit->setValidator(new QIntValidator(1, 100, chargeStateEdit));
+    chargeStateEdit->setText("1");  // Default charge state
 
     int inputRow = 0;
     auto* freqLabel = new QLabel("Frequency:");

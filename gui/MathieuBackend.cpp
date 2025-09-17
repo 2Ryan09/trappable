@@ -7,7 +7,7 @@
 void MathieuBackend::calculate(double frequency, double radius, double mass, double voltageRf,
                                double voltageRfMax, double voltageDc, int chargeState) {
     mathieu_lib::QuadrupoleParams params(frequency, radius, mass);
-    constexpr double LMCO_MAGIC = 0.908;
+    constexpr double LMCO_MAGIC = mathieu_lib::MAX_Q;
     m_omega = QString::number(mathieu_lib::omega(frequency));
     m_particleMass = QString::number(mathieu_lib::particle_mass(mass));
     m_mathieuQ = QString::number(mathieu_lib::mathieu_q(voltageRf, chargeState, params));

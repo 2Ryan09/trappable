@@ -40,7 +40,7 @@ if(BUILD_TESTS)
 	)
 
 	add_executable(test_stabilitycalculator tests/test_stabilitycalculator.cpp gui/stability/StabilityCalculator.cpp)
-	target_include_directories(test_stabilitycalculator PRIVATE ${CMAKE_SOURCE_DIR}/gui ${CMAKE_SOURCE_DIR}/gui/stability ${Qt6Gui_INCLUDE_DIRS})
+	target_include_directories(test_stabilitycalculator PRIVATE ${CMAKE_SOURCE_DIR}/gui ${CMAKE_SOURCE_DIR}/gui/stability ${CMAKE_SOURCE_DIR}/mathieu_lib/include ${Qt6Gui_INCLUDE_DIRS})
 	target_link_libraries(test_stabilitycalculator PRIVATE Qt6::Gui GTest::gtest GTest::gtest_main pthread)
 	set_target_properties(test_stabilitycalculator PROPERTIES
 		INSTALL_RPATH "$ORIGIN:/usr/lib:/usr/lib/x86_64-linux-gnu:/usr/local/lib"

@@ -1,8 +1,8 @@
-
 #include <gtest/gtest.h>
 
 #include <QVector2D>
 
+#include "mathieu_lib/mathieu.h"
 #include "stability/StabilityCalculator.h"
 
 using namespace StabilityCalculator;
@@ -31,7 +31,7 @@ TEST(StabilityCalculatorTest, MetricsOutsideBoundary) {
 }
 
 TEST(StabilityCalculatorTest, MetricsExtremeValues) {
-    double q_min = 0.0, q_max = 0.908;
+    double q_min = 0.0, q_max = mathieu_lib::MAX_Q;
     double a_min = 0.0, a_max = StabilityCalculator::calculateUpperBoundary(q_max);
     EXPECT_GE(StabilityCalculator::verticalDistance(a_min, q_min), 0.0);
     EXPECT_GE(StabilityCalculator::verticalDistance(a_max, q_max), 0.0);

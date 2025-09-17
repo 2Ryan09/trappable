@@ -190,7 +190,7 @@ auto mz(const std::vector<double>& voltage_rfs, const std::vector<int>& charge_s
  * @param charge_state Charge state of the ion (integer).
  * @param omega_val Angular drive frequency in radians per second.
  * @param quad_radius Characteristic dimension of the quadrupole in meters.
- * @param max_q Minimum stable q value (default is 0.908).
+ * @param max_q Minimum stable q value (default is MAX_Q).
  * @return The LMCO in kg/mol.
  */
 auto lmco(double voltage_rf, int charge_state, const QuadrupoleParams& params, double max_q = MAX_Q)
@@ -218,7 +218,7 @@ auto lmco(const std::vector<double>& voltage_rfs, const std::vector<int>& charge
  *
  * where:
  * - \f$ V_{rf_max} \f$ is the maximum amplitude of the RF voltage
- * - \f$ q_{max} \f$ is the maximum stable q value (default is 0.908)
+ * - \f$ q_{max} \f$ is the maximum stable q value (default is MAX_Q)
  * - \f$ N_A \f$ is Avogadro's number
  * - \f$ \omega \f$ is the angular drive frequency
  * - \f$ r_0 \f$ is the characteristic dimension of the quadrupole

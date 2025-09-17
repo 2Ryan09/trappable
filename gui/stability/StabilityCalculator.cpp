@@ -1,14 +1,15 @@
-
 #include "StabilityCalculator.h"
 
 #include <QVector2D>
 #include <QVector>
 
+#include "mathieu_lib/mathieu.h"
+
 namespace StabilityCalculator {
 
 std::pair<double, double> findNearestBoundaryPoint(double q, double a) {
     constexpr double min_q = 0.0;
-    constexpr double max_q = 0.908;
+    constexpr double max_q = mathieu_lib::MAX_Q;
     constexpr double coarse_step = 0.001;
     constexpr double fine_window = 0.01;
     constexpr double fine_step = 0.00001;
@@ -62,11 +63,11 @@ double calculateUpperBoundary(double q) {
     } else if (q <= 0.706) {
         return (q * q / 2.0) - (7.0 * qPow(q, 4) / 128.0) + (29.0 * qPow(q, 6) / 2304.0) -
                (68687.0 * qPow(q, 8) / 18874368.0);
-    } else if (q <= 0.908) {
+    } else if (q <= mathieu_lib::MAX_Q) {
         double q0 = 0.706;
         double a0 = (q0 * q0 / 2.0) - (7.0 * qPow(q0, 4) / 128.0) + (29.0 * qPow(q0, 6) / 2304.0) -
                     (68687.0 * qPow(q0, 8) / 18874368.0);
-        double t = (q - q0) / (0.908 - q0);
+        double t = (q - q0) / (mathieu_lib::MAX_Q - q0);
         return a0 * (1.0 - t);
     }
     return 0.0;

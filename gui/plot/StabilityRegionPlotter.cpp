@@ -1,11 +1,10 @@
-
-
 #include "StabilityRegionPlotter.h"
 
 #include <QVector>
 #include <QtMath>
 
 #include "QCustomPlot/qcustomplot.h"
+#include "mathieu_lib/mathieu.h"
 #include "stability/StabilityCalculator.h"
 
 StabilityRegionPlotter::StabilityRegionPlotter(QCustomPlot* plot)
@@ -19,7 +18,7 @@ void StabilityRegionPlotter::setupStabilityRegion(QCustomPlot* customPlot) {
     QVector<double> q_values, a_values;
     int numPoints = 500;
     for (int i = 0; i <= numPoints; ++i) {
-        double q = 0.908 * i / numPoints;
+        double q = mathieu_lib::MAX_Q * i / numPoints;
         double a = StabilityCalculator::calculateUpperBoundary(q);
         q_values.append(q);
         a_values.append(a);
@@ -33,7 +32,7 @@ void StabilityRegionPlotter::setupStabilityRegion(QCustomPlot* customPlot) {
     stabilityRegion->setLineStyle(QCPCurve::lsLine);
     customPlot->xAxis->setLabel("Mathieu q");
     customPlot->yAxis->setLabel("Mathieu a");
-    customPlot->xAxis->setRange(0, 0.908);
+    customPlot->xAxis->setRange(0, mathieu_lib::MAX_Q);
     customPlot->yAxis->setRange(0, 0.25);
     customPlot->legend->setVisible(false);
     customPlot->axisRect()->setMargins(QMargins(40, 20, 20, 40));

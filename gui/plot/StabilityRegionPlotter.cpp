@@ -5,6 +5,7 @@
 
 #include "QCustomPlot/qcustomplot.h"
 #include "mathieu_lib/mathieu.h"
+#include "plot/QCustomPlotTheme.h"
 #include "stability/StabilityCalculator.h"
 
 StabilityRegionPlotter::StabilityRegionPlotter(QCustomPlot* plot)
@@ -36,6 +37,7 @@ void StabilityRegionPlotter::setupStabilityRegion(QCustomPlot* customPlot) {
     customPlot->yAxis->setRange(0, 0.25);
     customPlot->legend->setVisible(false);
     customPlot->axisRect()->setMargins(QMargins(40, 20, 20, 40));
+    QCustomPlotTheme::applySystemTheme(customPlot);
     customPlot->replot();
 }
 

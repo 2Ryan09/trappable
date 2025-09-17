@@ -182,20 +182,14 @@ void MathieuWindow::handleCalculation() {
                        secular_freq_val, mz_val, lmco_val, max_mz_val);
     stabilityPlotter->plotPoint(mathieu_q_val, mathieu_a_val);
 
-    // Calculate and update stability outputs
-    double a_boundary = StabilityCalculator::calculateUpperBoundary(mathieu_q_val);
-    // Draw indicators and get vertical, left, right distances
-    auto [delta_a, delta_q_left, delta_q_right] =
-        stabilityPlotter->drawDistanceIndicators(mathieu_q_val, mathieu_a_val, a_boundary);
-    // Horizontal metric: minimum distance to left/right boundary
-    double delta_q = std::min(std::abs(delta_q_left), std::abs(delta_q_right));
-    double delta_e = StabilityCalculator::euclideanDistance(mathieu_a_val, a_boundary,
-                                                            mathieu_q_val, mathieu_q_val);
-    double theta =
-        StabilityCalculator::angularOffset(mathieu_a_val, a_boundary, mathieu_q_val, mathieu_q_val);
-    double s_norm = StabilityCalculator::normalizedStabilityMargin(mathieu_a_val, a_boundary,
-                                                                   mathieu_q_val, mathieu_q_val);
-    // For worst-case, just use single boundary for now
+    // Calculate and update stability outputs using nearest boundary point
+    auto [q_b, a_b] = StabilityCalculator::findNearestBoundaryPoint(mathieu_q_val, mathieu_a_val);
+    double delta_a = a_b - mathieu_a_val;
+    double delta_q = q_b - mathieu_q_val;
+    double delta_e = qSqrt((mathieu_q_val - q_b) * (mathieu_q_val - q_b) +
+                           (mathieu_a_val - a_b) * (mathieu_a_val - a_b));
+    double theta = StabilityCalculator::angularOffset(mathieu_a_val, a_b, mathieu_q_val, q_b);
+    double s_norm = delta_e / qSqrt(a_b * a_b + q_b * q_b);
     double delta_min = delta_e;
 
     constexpr double e_charge = 1.602176634e-19;
@@ -213,6 +207,9 @@ void MathieuWindow::handleCalculation() {
     stabilityOutputs->setDeltaMin(delta_min);
     stabilityOutputs->setVoltageDiff(voltage_diff);
     stabilityOutputs->setResolution(resolution);
+
+    // Draw right triangle indicators
+    stabilityPlotter->drawNearestPointTriangle(mathieu_q_val, mathieu_a_val, q_b, a_b);
 }
 
 /**

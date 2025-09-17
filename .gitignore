@@ -62,6 +62,7 @@ test_mathieu
 test_mathieu_e2e
 test_mathieuwindow_gui
 test_mathieu_vector
+test_stabilitycalculator
 
 # Editor/OS files
 .DS_Store

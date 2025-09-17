@@ -9,11 +9,7 @@ class StabilityRegionPlotter {
     StabilityRegionPlotter(QCustomPlot* plot);
     void setupStabilityRegion(QCustomPlot* customPlot);
     void plotPoint(double q, double a);
-    double drawVerticalDistanceIndicator(double q, double a, double a_boundary);
-    double drawLeftHorizontalDistanceIndicator(double q, double a);
-    double drawRightHorizontalDistanceIndicator(double q, double a);
-    std::tuple<double, double, double> drawDistanceIndicators(double q, double a,
-                                                              double a_boundary);
+    void drawNearestPointTriangle(double q, double a, double q_b, double a_b);
     double calculateUpperBoundary(double q);
 
    private:

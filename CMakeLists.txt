@@ -2,10 +2,9 @@
 # Use ccache for faster builds if available
 find_program(CCACHE_PROGRAM ccache)
 if(CCACHE_PROGRAM)
-	set(CMAKE_C_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")
-	set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")
+    set(CMAKE_C_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")
+    set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")
 endif()
-
 
 cmake_minimum_required(VERSION 3.16)
 project(trappable LANGUAGES CXX)
@@ -28,12 +27,24 @@ option(BUILD_TESTS "Build test executables" ON)
 
 if(BUILD_TESTS)
 	enable_testing()
-	find_package(GTest REQUIRED)
-	# Ensure libgtest.so is found at runtime
+	include(FetchContent)
+	FetchContent_Declare(
+		googletest
+		URL https://github.com/google/googletest/archive/refs/heads/main.zip
+		DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+	)
+	set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+
+	FetchContent_MakeAvailable(googletest)
+	# Disable AUTOMOC for GoogleTest targets to avoid AUTOGEN Qt warnings
+	set_target_properties(gtest PROPERTIES AUTOMOC OFF)
+	set_target_properties(gtest_main PROPERTIES AUTOMOC OFF)
+	set_target_properties(gmock PROPERTIES AUTOMOC OFF)
+	set_target_properties(gmock_main PROPERTIES AUTOMOC OFF)
 
 	add_executable(test_mathieu tests/test_mathieu.cpp)
 	target_include_directories(test_mathieu PRIVATE ${CMAKE_SOURCE_DIR}/mathieu_lib/include ${CMAKE_SOURCE_DIR}/gui ${CMAKE_SOURCE_DIR}/gui/plot)
-	target_link_libraries(test_mathieu PRIVATE mathieu_lib GTest::gtest GTest::gtest_main pthread)
+	target_link_libraries(test_mathieu PRIVATE mathieu_lib gtest gtest_main)
 	set_target_properties(test_mathieu PROPERTIES
 		INSTALL_RPATH "$ORIGIN:/usr/lib:/usr/lib/x86_64-linux-gnu:/usr/local/lib"
 		BUILD_WITH_INSTALL_RPATH ON
@@ -41,7 +52,7 @@ if(BUILD_TESTS)
 
 	add_executable(test_stabilitycalculator tests/test_stabilitycalculator.cpp gui/stability/StabilityCalculator.cpp)
 	target_include_directories(test_stabilitycalculator PRIVATE ${CMAKE_SOURCE_DIR}/gui ${CMAKE_SOURCE_DIR}/gui/stability ${CMAKE_SOURCE_DIR}/mathieu_lib/include ${Qt6Gui_INCLUDE_DIRS})
-	target_link_libraries(test_stabilitycalculator PRIVATE Qt6::Gui GTest::gtest GTest::gtest_main pthread)
+	target_link_libraries(test_stabilitycalculator PRIVATE Qt6::Gui gtest gtest_main)
 	set_target_properties(test_stabilitycalculator PROPERTIES
 		INSTALL_RPATH "$ORIGIN:/usr/lib:/usr/lib/x86_64-linux-gnu:/usr/local/lib"
 		BUILD_WITH_INSTALL_RPATH ON
@@ -52,7 +63,7 @@ if(BUILD_TESTS)
 	# StabilityOutputs GUI/output logic tests
 	add_executable(test_stabilityoutputs tests/test_stabilityoutputs.cpp gui/stability/StabilityOutputs.cpp)
 	target_include_directories(test_stabilityoutputs PRIVATE ${CMAKE_SOURCE_DIR}/gui ${CMAKE_SOURCE_DIR}/gui/stability)
-	target_link_libraries(test_stabilityoutputs PRIVATE Qt6::Widgets GTest::gtest GTest::gtest_main pthread)
+	target_link_libraries(test_stabilityoutputs PRIVATE Qt6::Widgets gtest gtest_main)
 	set_target_properties(test_stabilityoutputs PROPERTIES
 		INSTALL_RPATH "$ORIGIN:/usr/lib:/usr/lib/x86_64-linux-gnu:/usr/local/lib"
 		BUILD_WITH_INSTALL_RPATH ON
@@ -62,7 +73,7 @@ if(BUILD_TESTS)
 	# Vectorized mathieu_lib tests
 	add_executable(test_mathieu_vector tests/test_mathieu_vector.cpp)
 	target_include_directories(test_mathieu_vector PRIVATE ${CMAKE_SOURCE_DIR}/mathieu_lib/include ${CMAKE_SOURCE_DIR}/gui ${CMAKE_SOURCE_DIR}/gui/plot)
-	target_link_libraries(test_mathieu_vector PRIVATE mathieu_lib GTest::gtest GTest::gtest_main pthread)
+	target_link_libraries(test_mathieu_vector PRIVATE mathieu_lib gtest gtest_main)
 	set_target_properties(test_mathieu_vector PROPERTIES
 		INSTALL_RPATH "$ORIGIN:/usr/lib:/usr/lib/x86_64-linux-gnu:/usr/local/lib"
 		BUILD_WITH_INSTALL_RPATH ON

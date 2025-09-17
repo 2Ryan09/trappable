@@ -1,5 +1,6 @@
 #include "MathieuWindow.h"
 
+#include <QDir>
 #include <QDoubleValidator>
 #include <QFormLayout>
 #include <QIntValidator>
@@ -30,33 +31,76 @@ namespace trappable {
  */
 MathieuWindow::MathieuWindow(QWidget* parent) : QWidget(parent) {
     setWindowTitle(QStringLiteral("Mathieu Quadrupole Stability Calculator"));
-    // Use a horizontal layout: left = inputs/results, right = plot
-    auto* mainLayout = new QHBoxLayout(this);
+    // Set window and taskbar icon (resource path to be updated when icon is available)
+    setWindowIcon(QIcon(":/icons/bayspec_logo_no_words.ico"));
+    // Main vertical layout for header and content
+    auto* mainLayout = new QVBoxLayout(this);
+
+    // Header row with centered logo
+    auto* headerWidget = new QWidget(this);
+    auto* headerLayout = new QHBoxLayout(headerWidget);
+    headerLayout->setContentsMargins(0, 0, 0, 0);
+    headerLayout->addStretch();
+    auto* logoLabel = new QLabel(headerWidget);
+    QPixmap logoPixmap(":/icons/assets/bayspec_logo.png");
+    qDebug() << "Loading logo from resource path: :/icons/bayspec_logo.png";
+    qDebug() << "Logo pixmap isNull?" << logoPixmap.isNull();
+    qDebug() << "Current working directory:" << QDir::currentPath();
+    QFileInfo logoFileInfo("assets/bayspec_logo.png");
+    qDebug() << "File exists in assets?" << logoFileInfo.exists();
+    qDebug() << "Qt resource file exists?" << QFile(":/icons/bayspec_logo.png").exists();
+    QStringList resourceList = QDir(":/icons").entryList();
+    qDebug() << "Qt resource /icons contains:" << resourceList;
+    // Print contents of the expected assets directory on disk
+    QDir assetsDir(QCoreApplication::applicationDirPath() + "/../gui/assets");
+    qDebug() << "Filesystem gui/assets contains:" << assetsDir.entryList(QDir::Files);
+    // Additional debugging for Qt resource system
+    qDebug() << "Checking QResource for logo...";
+    QResource resLogo(":/icons/bayspec_logo.png");
+    qDebug() << "QResource isValid?" << resLogo.isValid();
+    qDebug() << "QResource size:" << resLogo.size();
+    QFile resourceFile(":/icons/bayspec_logo.png");
+    bool resourceOpened = resourceFile.open(QIODevice::ReadOnly);
+    qDebug() << "QFile open for resource?" << resourceOpened;
+    if (resourceOpened) {
+        QByteArray resourceData = resourceFile.readAll();
+        qDebug() << "Resource file size:" << resourceData.size();
+        resourceFile.close();
+    }
+    if (logoPixmap.isNull()) {
+        logoLabel->setText("Logo not found");
+    } else {
+        logoLabel->setPixmap(logoPixmap.scaledToHeight(64, Qt::SmoothTransformation));
+    }
+    logoLabel->setAlignment(Qt::AlignCenter);
+    headerLayout->addWidget(logoLabel);
+    headerLayout->addStretch();
+    headerWidget->setLayout(headerLayout);
+    mainLayout->addWidget(headerWidget);
+
+    // Content row: horizontal layout for left/right
+    auto* contentLayout = new QHBoxLayout;
+
     // Left side: inputs and outputs
     auto* leftWidget = new QWidget(this);
     auto* leftLayout = new QVBoxLayout(leftWidget);
     inputs = new Inputs(leftWidget);
     leftLayout->addWidget(inputs);
-
     calcButton = new QPushButton(QStringLiteral("Calculate"));
     calcButton->setObjectName(QStringLiteral("calcButton"));
     calcButton->setEnabled(false);
     leftLayout->addWidget(calcButton);
-
     auto* separator = new QFrame;
     separator->setFrameShape(QFrame::HLine);
     separator->setFrameShadow(QFrame::Sunken);
     leftLayout->addWidget(separator);
-
     outputs = new Outputs(leftWidget);
     leftLayout->addWidget(outputs);
-
     leftLayout->addStretch();
-    mainLayout->addWidget(leftWidget, 0);  // left side, stretch factor 0
-    leftLayout->addStretch();
-    mainLayout->addWidget(leftWidget, 0);  // left side, stretch factor 0
+    leftWidget->setLayout(leftLayout);
+    contentLayout->addWidget(leftWidget, 0);
 
-    // Right side: large stability plot
+    // Right side: large stability plot and outputs
     stabilityPlotWidget = new QCustomPlot(this);
     stabilityPlotWidget->setMinimumWidth(600);
     stabilityPlotWidget->setMinimumHeight(400);
@@ -68,7 +112,6 @@ MathieuWindow::MathieuWindow(QWidget* parent) : QWidget(parent) {
     topAxis->setLabel("");
     rightAxis->setTickLabels(false);
     topAxis->setTickLabels(false);
-    mainLayout->addWidget(stabilityPlotWidget, 1);  // right side, stretch factor 1
 
     stabilityPlotter = new StabilityRegionPlotter(stabilityPlotWidget);
 
@@ -96,7 +139,10 @@ MathieuWindow::MathieuWindow(QWidget* parent) : QWidget(parent) {
     rightLayout->addWidget(stabilityOutputs);
     auto* rightWidget = new QWidget(this);
     rightWidget->setLayout(rightLayout);
-    mainLayout->addWidget(rightWidget, 1);
+    contentLayout->addWidget(rightWidget, 1);
+
+    // Add the horizontal content row below the header
+    mainLayout->addLayout(contentLayout);
 
     connect(
         calcButton, &QPushButton::clicked, this, [this]() { this->handleCalculation(); },

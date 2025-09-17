@@ -52,8 +52,9 @@ target_include_directories(mathieuwindow PUBLIC
 )
 target_link_libraries(mathieuwindow PRIVATE stabilityregionplotter mathieubackend stability Qt6::Widgets Qt6::PrintSupport)
 
-
-add_executable(gui main.cpp)
+qt_add_resources(GUI_RESOURCES icons.qrc)
+add_executable(gui WIN32 main.cpp ${APP_ICON_RESOURCE_WINDOWS} ${GUI_RESOURCES})
+set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_CURRENT_SOURCE_DIR}/appicon.rc")
 
 target_link_libraries(gui PRIVATE mathieuwindow stabilityregionplotter mathieubackend stability Qt6::Widgets Qt6::PrintSupport mathieu_lib qcustomplot)
 target_include_directories(gui PRIVATE

@@ -26,6 +26,7 @@ ui_*.h
 object_script.*.Release
 object_script.*.Debug
 *_autogen
+*.depends
 
 # QtCreator and IDE files
 *.pro.user

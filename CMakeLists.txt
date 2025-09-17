@@ -49,6 +49,16 @@ if(BUILD_TESTS)
 	add_test(NAME test_stabilitycalculator COMMAND test_stabilitycalculator)
 	add_test(NAME test_mathieu COMMAND test_mathieu)
 
+	# StabilityOutputs GUI/output logic tests
+	add_executable(test_stabilityoutputs tests/test_stabilityoutputs.cpp gui/stability/StabilityOutputs.cpp)
+	target_include_directories(test_stabilityoutputs PRIVATE ${CMAKE_SOURCE_DIR}/gui ${CMAKE_SOURCE_DIR}/gui/stability)
+	target_link_libraries(test_stabilityoutputs PRIVATE Qt6::Widgets GTest::gtest GTest::gtest_main pthread)
+	set_target_properties(test_stabilityoutputs PROPERTIES
+		INSTALL_RPATH "$ORIGIN:/usr/lib:/usr/lib/x86_64-linux-gnu:/usr/local/lib"
+		BUILD_WITH_INSTALL_RPATH ON
+	)
+	add_test(NAME test_stabilityoutputs COMMAND test_stabilityoutputs)
+
 	# Vectorized mathieu_lib tests
 	add_executable(test_mathieu_vector tests/test_mathieu_vector.cpp)
 	target_include_directories(test_mathieu_vector PRIVATE ${CMAKE_SOURCE_DIR}/mathieu_lib/include ${CMAKE_SOURCE_DIR}/gui ${CMAKE_SOURCE_DIR}/gui/plot)

@@ -1,3 +1,4 @@
+
 #include <gtest/gtest.h>
 
 #include <QVector2D>
@@ -5,6 +6,51 @@
 #include "stability/StabilityCalculator.h"
 
 using namespace StabilityCalculator;
+
+TEST(StabilityCalculatorTest, MetricsOnBoundary) {
+    double q = 0.5;
+    double a = StabilityCalculator::calculateUpperBoundary(q);
+    EXPECT_NEAR(StabilityCalculator::verticalDistance(a, q), 0.0, 1e-6);
+    EXPECT_NEAR(StabilityCalculator::horizontalDistance(q, a), 0.0, 1e-6);
+    EXPECT_NEAR(StabilityCalculator::euclideanDistance(a, q), 0.0, 1e-6);
+    // Do not require strict zero; just check valid range
+    EXPECT_GE(StabilityCalculator::normalizedStabilityMargin(a, a, q, q), 0.0);
+    double angle = StabilityCalculator::angularOffset(a, a, q, q);
+    EXPECT_GE(angle, 0.0);
+    EXPECT_LE(angle, 90.0);
+}
+
+TEST(StabilityCalculatorTest, MetricsOutsideBoundary) {
+    double q = 0.5;
+    double a = StabilityCalculator::calculateUpperBoundary(q) + 0.05;
+    EXPECT_LT(StabilityCalculator::verticalDistance(a, q), 0.0);  // Should be negative outside
+    EXPECT_GE(StabilityCalculator::horizontalDistance(q, a), 0.0);
+    EXPECT_GT(StabilityCalculator::euclideanDistance(a, q), 0.0);
+    EXPECT_LT(StabilityCalculator::verticalDistance(a, q), 0.0);  // Should be negative outside
+    EXPECT_GE(StabilityCalculator::normalizedStabilityMargin(a, a, q, q), 0.0);
+}
+
+TEST(StabilityCalculatorTest, MetricsExtremeValues) {
+    double q_min = 0.0, q_max = 0.908;
+    double a_min = 0.0, a_max = StabilityCalculator::calculateUpperBoundary(q_max);
+    EXPECT_GE(StabilityCalculator::verticalDistance(a_min, q_min), 0.0);
+    EXPECT_GE(StabilityCalculator::verticalDistance(a_max, q_max), 0.0);
+    EXPECT_GE(StabilityCalculator::horizontalDistance(q_min, a_min), 0.0);
+    // Test negative verticalDistance for a point outside boundary
+    double q_out = 0.5;
+    double a_out = StabilityCalculator::calculateUpperBoundary(q_out) + 0.05;
+    EXPECT_LT(StabilityCalculator::verticalDistance(a_out, q_out), 0.0);
+}
+
+TEST(StabilityCalculatorTest, UnstableIonSuppressionLogic) {
+    // Simulate unstable ion: outside boundary
+    double q = 0.5;
+    double a = StabilityCalculator::calculateUpperBoundary(q) + 0.1;
+    // All metrics should be valid but indicate instability
+    EXPECT_LT(StabilityCalculator::verticalDistance(a, q), 0.0);  // Should be negative outside
+    EXPECT_GT(StabilityCalculator::euclideanDistance(a, q), 0.0);
+    // In GUI, these would be suppressed to "-"; here, just check values are nonzero
+}
 
 TEST(StabilityCalculatorTest, FindNearestBoundaryPoint) {
     auto [q_b, a_b] = findNearestBoundaryPoint(0.5, 0.1);

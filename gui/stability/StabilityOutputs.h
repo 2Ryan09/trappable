@@ -26,6 +26,18 @@ class StabilityOutputs : public QWidget {
     void setSNorm(double value);
     void setDeltaMin(double value);
 
+    // Public getters for testing
+    QLabel* getOverlayLabel() const { return overlayLabel; }
+    QWidget* getWarningOverlay() const { return warningOverlay; }
+    QLabel* getDeltaALabel() const { return deltaALabel; }
+    QLabel* getDeltaQLabel() const { return deltaQLabel; }
+    QLabel* getDeltaELabel() const { return deltaELabel; }
+    QLabel* getThetaLabel() const { return thetaLabel; }
+    QLabel* getSNormLabel() const { return sNormLabel; }
+    QLabel* getDeltaMinLabel() const { return deltaMinLabel; }
+    QLabel* getVoltageDiffLabel() const { return voltageDiffLabel; }
+    QLabel* getResolutionLabel() const { return resolutionLabel; }
+
    private:
     QWidget* warningOverlay;  // Frosted glass overlay
     QLabel* overlayLabel;     // Centered warning message on overlay

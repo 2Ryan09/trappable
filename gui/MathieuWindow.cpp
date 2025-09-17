@@ -184,9 +184,11 @@ void MathieuWindow::handleCalculation() {
 
     // Calculate and update stability outputs
     double a_boundary = StabilityCalculator::calculateUpperBoundary(mathieu_q_val);
-    double delta_a = StabilityCalculator::verticalDistance(mathieu_a_val, a_boundary);
-    double delta_q = StabilityCalculator::horizontalDistance(
-        mathieu_q_val, mathieu_q_val);  // For now, boundary q = operating q
+    // Draw indicators and get vertical, left, right distances
+    auto [delta_a, delta_q_left, delta_q_right] =
+        stabilityPlotter->drawDistanceIndicators(mathieu_q_val, mathieu_a_val, a_boundary);
+    // Horizontal metric: minimum distance to left/right boundary
+    double delta_q = std::min(std::abs(delta_q_left), std::abs(delta_q_right));
     double delta_e = StabilityCalculator::euclideanDistance(mathieu_a_val, a_boundary,
                                                             mathieu_q_val, mathieu_q_val);
     double theta =
@@ -211,7 +213,6 @@ void MathieuWindow::handleCalculation() {
     stabilityOutputs->setDeltaMin(delta_min);
     stabilityOutputs->setVoltageDiff(voltage_diff);
     stabilityOutputs->setResolution(resolution);
-    stabilityPlotter->drawVerticalDistance(mathieu_q_val, mathieu_a_val, a_boundary);
 }
 
 /**

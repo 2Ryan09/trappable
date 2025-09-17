@@ -24,11 +24,6 @@ void StabilityRegionPlotter::setupStabilityRegion(QCustomPlot* customPlot) {
         q_values.append(q);
         a_values.append(a);
     }
-    for (int i = numPoints; i >= 0; --i) {
-        double q = 0.908 * i / numPoints;
-        q_values.append(q);
-        a_values.append(0.0);
-    }
     stabilityRegion->setData(q_values, a_values);
     QPen regionPen(Qt::blue);
     regionPen.setWidth(2);
@@ -64,10 +59,10 @@ void StabilityRegionPlotter::plotPoint(double q, double a) {
     m_plot->replot();
 }
 
-void StabilityRegionPlotter::drawVerticalDistance(double q, double a, double a_boundary) {
+double StabilityRegionPlotter::drawVerticalDistanceIndicator(double q, double a,
+                                                             double a_boundary) {
     if (!m_plot)
-        return;
-    // Remove previous vertical line if it exists
+        return 0.0;
     if (m_verticalLine) {
         m_plot->removeItem(m_verticalLine);
         m_verticalLine = nullptr;
@@ -82,4 +77,74 @@ void StabilityRegionPlotter::drawVerticalDistance(double q, double a, double a_b
     pen.setWidth(3);
     m_verticalLine->setPen(pen);
     m_plot->replot();
+    return a_boundary - a;
+}
+
+double StabilityRegionPlotter::drawLeftHorizontalDistanceIndicator(double q, double a) {
+    if (!m_plot)
+        return 0.0;
+    double min_q = 0.0;
+    double left_q = q;
+    for (double test_q = q; test_q >= min_q; test_q -= 0.001) {
+        double test_a = StabilityCalculator::calculateUpperBoundary(test_q);
+        if (std::abs(test_a - a) < 1e-4 || test_a < a) {
+            left_q = test_q;
+            break;
+        }
+    }
+    if (m_leftHorizontalLine) {
+        m_plot->removeItem(m_leftHorizontalLine);
+        m_leftHorizontalLine = nullptr;
+    }
+    m_leftHorizontalLine = new QCPItemLine(m_plot);
+    m_leftHorizontalLine->setObjectName("leftHorizontalDistanceLine");
+    m_leftHorizontalLine->start->setType(QCPItemPosition::ptPlotCoords);
+    m_leftHorizontalLine->end->setType(QCPItemPosition::ptPlotCoords);
+    m_leftHorizontalLine->start->setCoords(q, a);
+    m_leftHorizontalLine->end->setCoords(left_q, a);
+    QPen leftPen(Qt::darkCyan);
+    leftPen.setWidth(2);
+    m_leftHorizontalLine->setPen(leftPen);
+    m_plot->replot();
+    return left_q - q;
+}
+
+double StabilityRegionPlotter::drawRightHorizontalDistanceIndicator(double q, double a) {
+    if (!m_plot)
+        return 0.0;
+    double max_q = 0.908;
+    double right_q = q;
+    for (double test_q = q; test_q <= max_q; test_q += 0.001) {
+        double test_a = StabilityCalculator::calculateUpperBoundary(test_q);
+        if (std::abs(test_a - a) < 1e-4 || test_a < a) {
+            right_q = test_q;
+            break;
+        }
+    }
+    if (m_rightHorizontalLine) {
+        m_plot->removeItem(m_rightHorizontalLine);
+        m_rightHorizontalLine = nullptr;
+    }
+    m_rightHorizontalLine = new QCPItemLine(m_plot);
+    m_rightHorizontalLine->setObjectName("rightHorizontalDistanceLine");
+    m_rightHorizontalLine->start->setType(QCPItemPosition::ptPlotCoords);
+    m_rightHorizontalLine->end->setType(QCPItemPosition::ptPlotCoords);
+    m_rightHorizontalLine->start->setCoords(q, a);
+    m_rightHorizontalLine->end->setCoords(right_q, a);
+    QPen rightPen(Qt::darkYellow);
+    rightPen.setWidth(2);
+    m_rightHorizontalLine->setPen(rightPen);
+    m_plot->replot();
+    return right_q - q;
+}
+
+std::tuple<double, double, double> StabilityRegionPlotter::drawDistanceIndicators(
+    double q, double a, double a_boundary) {
+    double vertical = 0.0, left = 0.0, right = 0.0;
+    if (a < a_boundary) {
+        vertical = drawVerticalDistanceIndicator(q, a, a_boundary);
+        left = drawLeftHorizontalDistanceIndicator(q, a);
+        right = drawRightHorizontalDistanceIndicator(q, a);
+    }
+    return {vertical, left, right};
 }

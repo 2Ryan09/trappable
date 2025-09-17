@@ -114,22 +114,15 @@ MathieuWindow::MathieuWindow(QWidget* parent) : QWidget(parent) {
     connectInputValidation(inputs->voltageDcEdit);
     connectInputValidation(inputs->chargeStateEdit);
 
-    // Also connect unit radio buttons to validation
-    auto connectUnitValidation = [this](QRadioButton* radio) {
-        connect(radio, &QRadioButton::toggled, this, [this]() { this->validateInputs(); });
+    // Connect unit dropdowns to validation
+    auto connectUnitComboValidation = [this](QComboBox* combo) {
+        connect(combo, &QComboBox::currentTextChanged, this, [this]() { this->validateInputs(); });
     };
-    connectUnitValidation(inputs->frequencyUnitHz);
-    connectUnitValidation(inputs->frequencyUnitKHz);
-    connectUnitValidation(inputs->radiusUnitM);
-    connectUnitValidation(inputs->radiusUnitMM);
-    connectUnitValidation(inputs->massUnitKg);
-    connectUnitValidation(inputs->massUnitG);
-    connectUnitValidation(inputs->voltageRfUnitV);
-    connectUnitValidation(inputs->voltageRfUnitMV);
-    connectUnitValidation(inputs->voltageRfMaxUnitV);
-    connectUnitValidation(inputs->voltageRfMaxUnitMV);
-    connectUnitValidation(inputs->voltageDcUnitV);
-    connectUnitValidation(inputs->voltageDcUnitMV);
+    connectUnitComboValidation(inputs->frequencyUnitCombo);
+    connectUnitComboValidation(inputs->radiusUnitCombo);
+    connectUnitComboValidation(inputs->voltageRfUnitCombo);
+    connectUnitComboValidation(inputs->voltageRfMaxUnitCombo);
+    connectUnitComboValidation(inputs->voltageDcUnitCombo);
     // Ensure initial validation state
     validateInputs();
 }

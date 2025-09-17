@@ -24,78 +24,78 @@ Inputs::Inputs(QWidget* parent) : QWidget(parent) {
         return std::make_tuple(leftRadio, rightRadio, widget);
     };
 
+    auto makeUnitCombo = [](const QStringList& units) {
+        auto* combo = new QComboBox;
+        combo->addItems(units);
+        combo->setCurrentIndex(0);  // Always select first by default
+        return combo;
+    };
+    int inputRow = 0;
+
+    // Frequency
     frequencyEdit = makeLineEdit("frequencyEdit");
     frequencyEdit->setValidator(new QDoubleValidator(0, 1e12, 6, frequencyEdit));
-    frequencyEdit->setText("970000");  // Default frequency in Hz
-    auto [frequencyUnitHz, frequencyUnitKHz, frequencyUnitWidget] = makeUnitRadios("Hz", "kHz");
-    this->frequencyUnitHz = frequencyUnitHz;
-    this->frequencyUnitKHz = frequencyUnitKHz;
-
-    radiusEdit = makeLineEdit("radiusEdit");
-    radiusEdit->setValidator(new QDoubleValidator(0, 1e6, 6, radiusEdit));
-    radiusEdit->setText("0.003478");  // Default radius in m
-    auto [radiusUnitM, radiusUnitMM, radiusUnitWidget] = makeUnitRadios("m", "mm");
-    this->radiusUnitM = radiusUnitM;
-    this->radiusUnitMM = radiusUnitMM;
-
-    massEdit = makeLineEdit("massEdit");
-    massEdit->setValidator(new QDoubleValidator(0, 1e6, 6, massEdit));
-    massEdit->setText("0.303");  // Default mass in kg
-    auto [massUnitKg, massUnitG, massUnitWidget] = makeUnitRadios("kg", "g");
-    this->massUnitKg = massUnitKg;
-    this->massUnitG = massUnitG;
-
-    voltageRfEdit = makeLineEdit("voltageRfEdit");
-    voltageRfEdit->setValidator(new QDoubleValidator(-1e6, 1e6, 6, voltageRfEdit));
-    voltageRfEdit->setText("150");  // Default RF voltage in V
-    auto [voltageRfUnitV, voltageRfUnitMV, voltageRfUnitWidget] = makeUnitRadios("V", "mV");
-    this->voltageRfUnitV = voltageRfUnitV;
-    this->voltageRfUnitMV = voltageRfUnitMV;
-
-    voltageRfMaxEdit = makeLineEdit("voltageRfMaxEdit");
-    voltageRfMaxEdit->setValidator(new QDoubleValidator(-1e6, 1e6, 6, voltageRfMaxEdit));
-    voltageRfMaxEdit->setText("3000");  // Default max RF voltage in V
-    auto [voltageRfMaxUnitV, voltageRfMaxUnitMV, voltageRfMaxUnitWidget] =
-        makeUnitRadios("V", "mV");
-    this->voltageRfMaxUnitV = voltageRfMaxUnitV;
-    this->voltageRfMaxUnitMV = voltageRfMaxUnitMV;
-
-    voltageDcEdit = makeLineEdit("voltageDcEdit");
-    voltageDcEdit->setValidator(new QDoubleValidator(-1e6, 1e6, 6, voltageDcEdit));
-    voltageDcEdit->setText("0");  // Default DC voltage in V
-    auto [voltageDcUnitV, voltageDcUnitMV, voltageDcUnitWidget] = makeUnitRadios("V", "mV");
-    this->voltageDcUnitV = voltageDcUnitV;
-    this->voltageDcUnitMV = voltageDcUnitMV;
-
-    chargeStateEdit = makeLineEdit("chargeStateEdit");
-    chargeStateEdit->setValidator(new QIntValidator(1, 100, chargeStateEdit));
-    chargeStateEdit->setText("1");  // Default charge state
-
-    int inputRow = 0;
+    frequencyEdit->setText("970000");
+    frequencyUnitCombo = makeUnitCombo({"Hz", "kHz"});
     auto* freqLabel = new QLabel("Frequency:");
     layout->addWidget(freqLabel, inputRow, 0);
     layout->addWidget(frequencyEdit, inputRow, 1);
-    layout->addWidget(frequencyUnitWidget, inputRow++, 2);
+    layout->addWidget(frequencyUnitCombo, inputRow++, 2);
+
+    // Radius
+    radiusEdit = makeLineEdit("radiusEdit");
+    radiusEdit->setValidator(new QDoubleValidator(0, 1e6, 6, radiusEdit));
+    radiusEdit->setText("0.003478");
+    radiusUnitCombo = makeUnitCombo({"m", "mm"});
     auto* radiusLabel = new QLabel("Quadrupole radius:");
     layout->addWidget(radiusLabel, inputRow, 0);
     layout->addWidget(radiusEdit, inputRow, 1);
-    layout->addWidget(radiusUnitWidget, inputRow++, 2);
+    layout->addWidget(radiusUnitCombo, inputRow++, 2);
+
+    // Mass
+    massEdit = makeLineEdit("massEdit");
+    massEdit->setValidator(new QDoubleValidator(0, 1e6, 6, massEdit));
+    massEdit->setText("0.303");
     auto* massLabel = new QLabel("Molar mass:");
+    auto* massUnitLabel = new QLabel("kg/mol");
     layout->addWidget(massLabel, inputRow, 0);
     layout->addWidget(massEdit, inputRow, 1);
-    layout->addWidget(massUnitWidget, inputRow++, 2);
+    layout->addWidget(massUnitLabel, inputRow++, 2);
+
+    // RF Voltage
+    voltageRfEdit = makeLineEdit("voltageRfEdit");
+    voltageRfEdit->setValidator(new QDoubleValidator(-1e6, 1e6, 6, voltageRfEdit));
+    voltageRfEdit->setText("150");
+    voltageRfUnitCombo = makeUnitCombo({"V", "mV"});
     auto* rfLabel = new QLabel("RF Voltage:");
     layout->addWidget(rfLabel, inputRow, 0);
     layout->addWidget(voltageRfEdit, inputRow, 1);
-    layout->addWidget(voltageRfUnitWidget, inputRow++, 2);
+    layout->addWidget(voltageRfUnitCombo, inputRow++, 2);
+
+    // RF Voltage (max)
+    voltageRfMaxEdit = makeLineEdit("voltageRfMaxEdit");
+    voltageRfMaxEdit->setValidator(new QDoubleValidator(-1e6, 1e6, 6, voltageRfMaxEdit));
+    voltageRfMaxEdit->setText("3000");
+    voltageRfMaxUnitCombo = makeUnitCombo({"V", "mV"});
     auto* rfMaxLabel = new QLabel("RF Voltage (max):");
     layout->addWidget(rfMaxLabel, inputRow, 0);
     layout->addWidget(voltageRfMaxEdit, inputRow, 1);
-    layout->addWidget(voltageRfMaxUnitWidget, inputRow++, 2);
+    layout->addWidget(voltageRfMaxUnitCombo, inputRow++, 2);
+
+    // DC Voltage
+    voltageDcEdit = makeLineEdit("voltageDcEdit");
+    voltageDcEdit->setValidator(new QDoubleValidator(-1e6, 1e6, 6, voltageDcEdit));
+    voltageDcEdit->setText("0");
+    voltageDcUnitCombo = makeUnitCombo({"V", "mV"});
     auto* dcLabel = new QLabel("DC Voltage:");
     layout->addWidget(dcLabel, inputRow, 0);
     layout->addWidget(voltageDcEdit, inputRow, 1);
-    layout->addWidget(voltageDcUnitWidget, inputRow++, 2);
+    layout->addWidget(voltageDcUnitCombo, inputRow++, 2);
+
+    // Charge state
+    chargeStateEdit = makeLineEdit("chargeStateEdit");
+    chargeStateEdit->setValidator(new QIntValidator(1, 100, chargeStateEdit));
+    chargeStateEdit->setText("1");
     auto* chargeLabel = new QLabel("Charge state:");
     layout->addWidget(chargeLabel, inputRow, 0);
     layout->addWidget(chargeStateEdit, inputRow, 1);
@@ -138,22 +138,21 @@ bool Inputs::getCalculationInputs(CalculationInputs& calcInputs) const {
     bool ok_freq = false, ok_radius = false, ok_mass = false, ok_voltage_rf = false,
          ok_voltage_rf_max = false, ok_voltage_dc = false, ok_charge_state = false;
     double freq = frequencyEdit->text().toDouble(&ok_freq);
-    if (frequencyUnitKHz->isChecked())
+    if (frequencyUnitCombo->currentText() == "kHz")
         freq *= 1000.0;
     double radius = radiusEdit->text().toDouble(&ok_radius);
-    if (radiusUnitMM->isChecked())
+    if (radiusUnitCombo->currentText() == "mm")
         radius /= 1000.0;
     double mass = massEdit->text().toDouble(&ok_mass);
-    if (massUnitG->isChecked())
-        mass /= 1000.0;
+    // mass is always in kg/mol, no conversion needed
     double voltage_rf = voltageRfEdit->text().toDouble(&ok_voltage_rf);
-    if (voltageRfUnitMV->isChecked())
+    if (voltageRfUnitCombo->currentText() == "mV")
         voltage_rf /= 1000.0;
     double voltage_rf_max = voltageRfMaxEdit->text().toDouble(&ok_voltage_rf_max);
-    if (voltageRfMaxUnitMV->isChecked())
+    if (voltageRfMaxUnitCombo->currentText() == "mV")
         voltage_rf_max /= 1000.0;
     double voltage_dc = voltageDcEdit->text().toDouble(&ok_voltage_dc);
-    if (voltageDcUnitMV->isChecked())
+    if (voltageDcUnitCombo->currentText() == "mV")
         voltage_dc /= 1000.0;
     int charge_state = chargeStateEdit->text().toInt(&ok_charge_state);
     bool allValid = ok_freq && ok_radius && ok_mass && ok_voltage_rf && ok_voltage_rf_max &&

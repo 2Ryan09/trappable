@@ -25,13 +25,12 @@ void GuiE2ETest::test_all_inputs_and_outputs() {
     w.inputs->voltageRfMaxEdit->setText("3000");
     w.inputs->voltageDcEdit->setText("0");
     w.inputs->chargeStateEdit->setText("1");
-    // Set units explicitly for robustness
-    w.inputs->frequencyUnitHz->setChecked(true);
-    w.inputs->radiusUnitM->setChecked(true);
-    w.inputs->massUnitKg->setChecked(true);
-    w.inputs->voltageRfUnitV->setChecked(true);
-    w.inputs->voltageRfMaxUnitV->setChecked(true);
-    w.inputs->voltageDcUnitV->setChecked(true);
+    // Set units explicitly for robustness (using combo boxes)
+    w.inputs->frequencyUnitCombo->setCurrentText("Hz");
+    w.inputs->radiusUnitCombo->setCurrentText("m");
+    w.inputs->voltageRfUnitCombo->setCurrentText("V");
+    w.inputs->voltageRfMaxUnitCombo->setCurrentText("V");
+    w.inputs->voltageDcUnitCombo->setCurrentText("V");
 
     // Simulate button click
     QTest::mouseClick(w.calcButton, Qt::LeftButton);

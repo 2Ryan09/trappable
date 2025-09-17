@@ -34,6 +34,7 @@ StabilityOutputs::StabilityOutputs(QWidget* parent) : QWidget(parent) {
 
     QLabel* deltaANameLabel = new QLabel("Vertical distance to boundary:", this);
     deltaALabel = new QLabel("-", this);
+    deltaALabel->setAlignment(Qt::AlignRight);
     QLabel* deltaAUnitLabel = new QLabel("Δa", this);
     layout->addWidget(deltaANameLabel, 1, 0);
     layout->addWidget(deltaALabel, 1, 1);
@@ -41,6 +42,7 @@ StabilityOutputs::StabilityOutputs(QWidget* parent) : QWidget(parent) {
 
     QLabel* deltaQNameLabel = new QLabel("Horizontal distance to boundary:", this);
     deltaQLabel = new QLabel("-", this);
+    deltaQLabel->setAlignment(Qt::AlignRight);
     QLabel* deltaQUnitLabel = new QLabel("Δq", this);
     layout->addWidget(deltaQNameLabel, 2, 0);
     layout->addWidget(deltaQLabel, 2, 1);
@@ -48,6 +50,7 @@ StabilityOutputs::StabilityOutputs(QWidget* parent) : QWidget(parent) {
 
     QLabel* deltaENameLabel = new QLabel("Euclidean distance to boundary:", this);
     deltaELabel = new QLabel("-", this);
+    deltaELabel->setAlignment(Qt::AlignRight);
     QLabel* deltaEUnitLabel = new QLabel("Δₑ", this);
     layout->addWidget(deltaENameLabel, 3, 0);
     layout->addWidget(deltaELabel, 3, 1);
@@ -55,6 +58,7 @@ StabilityOutputs::StabilityOutputs(QWidget* parent) : QWidget(parent) {
 
     QLabel* thetaNameLabel = new QLabel("Angular offset to boundary:", this);
     thetaLabel = new QLabel("-", this);
+    thetaLabel->setAlignment(Qt::AlignRight);
     QLabel* thetaUnitLabel = new QLabel("deg", this);
     layout->addWidget(thetaNameLabel, 4, 0);
     layout->addWidget(thetaLabel, 4, 1);
@@ -62,6 +66,7 @@ StabilityOutputs::StabilityOutputs(QWidget* parent) : QWidget(parent) {
 
     QLabel* sNormNameLabel = new QLabel("Normalized stability margin:", this);
     sNormLabel = new QLabel("-", this);
+    sNormLabel->setAlignment(Qt::AlignRight);
     QLabel* sNormUnitLabel = new QLabel("", this);
     layout->addWidget(sNormNameLabel, 5, 0);
     layout->addWidget(sNormLabel, 5, 1);
@@ -69,6 +74,7 @@ StabilityOutputs::StabilityOutputs(QWidget* parent) : QWidget(parent) {
 
     QLabel* deltaMinNameLabel = new QLabel("Worst-case boundary proximity:", this);
     deltaMinLabel = new QLabel("-", this);
+    deltaMinLabel->setAlignment(Qt::AlignRight);
     QLabel* deltaMinUnitLabel = new QLabel("Δmin", this);
     layout->addWidget(deltaMinNameLabel, 6, 0);
     layout->addWidget(deltaMinLabel, 6, 1);
@@ -76,6 +82,7 @@ StabilityOutputs::StabilityOutputs(QWidget* parent) : QWidget(parent) {
 
     QLabel* voltageDiffNameLabel = new QLabel("Voltage difference to boundary:", this);
     voltageDiffLabel = new QLabel("-", this);
+    voltageDiffLabel->setAlignment(Qt::AlignRight);
     QLabel* voltageDiffUnitLabel = new QLabel("V", this);
     layout->addWidget(voltageDiffNameLabel, 7, 0);
     layout->addWidget(voltageDiffLabel, 7, 1);
@@ -83,6 +90,7 @@ StabilityOutputs::StabilityOutputs(QWidget* parent) : QWidget(parent) {
 
     QLabel* resolutionNameLabel = new QLabel("Resolution (Δa/a):", this);
     resolutionLabel = new QLabel("-", this);
+    resolutionLabel->setAlignment(Qt::AlignRight);
     QLabel* resolutionUnitLabel = new QLabel("", this);
     layout->addWidget(resolutionNameLabel, 8, 0);
     layout->addWidget(resolutionLabel, 8, 1);

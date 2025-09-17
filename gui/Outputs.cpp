@@ -8,6 +8,7 @@ Outputs::Outputs(QWidget* parent) : QWidget(parent) {
 
     int row = 0;
     omegaValueLabel = new QLabel("-", this);
+    omegaValueLabel->setAlignment(Qt::AlignRight);
     omegaUnitLabel = new QLabel("Hz", this);
     auto* omegaLabel = new QLabel("Omega:");
     layout->addWidget(omegaLabel, row, 0);
@@ -15,6 +16,7 @@ Outputs::Outputs(QWidget* parent) : QWidget(parent) {
     layout->addWidget(omegaUnitLabel, row++, 2);
 
     particleMassValueLabel = new QLabel("-", this);
+    particleMassValueLabel->setAlignment(Qt::AlignRight);
     particleMassUnitLabel = new QLabel("kg", this);
     auto* massLabel = new QLabel("Particle mass:");
     layout->addWidget(massLabel, row, 0);
@@ -22,6 +24,7 @@ Outputs::Outputs(QWidget* parent) : QWidget(parent) {
     layout->addWidget(particleMassUnitLabel, row++, 2);
 
     mathieuQValueLabel = new QLabel("-", this);
+    mathieuQValueLabel->setAlignment(Qt::AlignRight);
     mathieuQUnitLabel = new QLabel("", this);
     auto* qLabel = new QLabel("Mathieu q:");
     layout->addWidget(qLabel, row, 0);
@@ -29,6 +32,7 @@ Outputs::Outputs(QWidget* parent) : QWidget(parent) {
     layout->addWidget(mathieuQUnitLabel, row++, 2);
 
     mathieuAValueLabel = new QLabel("-", this);
+    mathieuAValueLabel->setAlignment(Qt::AlignRight);
     mathieuAUnitLabel = new QLabel("", this);
     auto* aLabel = new QLabel("Mathieu a:");
     layout->addWidget(aLabel, row, 0);
@@ -36,6 +40,7 @@ Outputs::Outputs(QWidget* parent) : QWidget(parent) {
     layout->addWidget(mathieuAUnitLabel, row++, 2);
 
     betaValueLabel = new QLabel("-", this);
+    betaValueLabel->setAlignment(Qt::AlignRight);
     betaUnitLabel = new QLabel("", this);
     auto* betaLabel = new QLabel("Beta:");
     layout->addWidget(betaLabel, row, 0);
@@ -43,6 +48,7 @@ Outputs::Outputs(QWidget* parent) : QWidget(parent) {
     layout->addWidget(betaUnitLabel, row++, 2);
 
     secularFrequencyValueLabel = new QLabel("-", this);
+    secularFrequencyValueLabel->setAlignment(Qt::AlignRight);
     secularFrequencyUnitLabel = new QLabel("Hz", this);
     auto* secFreqLabel = new QLabel("Secular frequency:");
     layout->addWidget(secFreqLabel, row, 0);
@@ -50,6 +56,7 @@ Outputs::Outputs(QWidget* parent) : QWidget(parent) {
     layout->addWidget(secularFrequencyUnitLabel, row++, 2);
 
     mzValueLabel = new QLabel("-", this);
+    mzValueLabel->setAlignment(Qt::AlignRight);
     mzUnitLabel = new QLabel("Da", this);
     auto* mzLabel = new QLabel("m/z:");
     layout->addWidget(mzLabel, row, 0);
@@ -57,6 +64,7 @@ Outputs::Outputs(QWidget* parent) : QWidget(parent) {
     layout->addWidget(mzUnitLabel, row++, 2);
 
     lmcoValueLabel = new QLabel("-", this);
+    lmcoValueLabel->setAlignment(Qt::AlignRight);
     lmcoUnitLabel = new QLabel("Da", this);
     auto* lmcoLabel = new QLabel("LMCO:");
     layout->addWidget(lmcoLabel, row, 0);
@@ -64,6 +72,7 @@ Outputs::Outputs(QWidget* parent) : QWidget(parent) {
     layout->addWidget(lmcoUnitLabel, row++, 2);
 
     maxMzValueLabel = new QLabel("-", this);
+    maxMzValueLabel->setAlignment(Qt::AlignRight);
     maxMzUnitLabel = new QLabel("Da", this);
     auto* maxMzLabel = new QLabel("Max m/z:");
     layout->addWidget(maxMzLabel, row, 0);

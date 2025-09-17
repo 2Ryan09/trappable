@@ -182,10 +182,21 @@ void MathieuWindow::handleCalculation() {
                        secular_freq_val, mz_val, lmco_val, max_mz_val);
     stabilityPlotter->plotPoint(mathieu_q_val, mathieu_a_val);
 
+    // Check if point is inside the stable region
+    bool isStable = (mathieu_a_val >= 0.0 && mathieu_q_val >= 0.0 && mathieu_q_val <= MAX_Q &&
+                     mathieu_a_val <= StabilityCalculator::calculateUpperBoundary(mathieu_q_val));
+    if (!isStable) {
+        stabilityOutputs->setWarning(
+            "Warning: The operating point is OUTSIDE the stable region! No stability metrics are "
+            "calculated.");
+        stabilityPlotter->drawUnstablePoint(mathieu_q_val, mathieu_a_val);
+        return;
+    }
+
     // Calculate and update stability outputs using nearest boundary point
     auto [q_b, a_b] = StabilityCalculator::findNearestBoundaryPoint(mathieu_q_val, mathieu_a_val);
     double delta_a = a_b - mathieu_a_val;
-    double delta_q = q_b - mathieu_q_val;
+    double delta_q = std::abs(q_b - mathieu_q_val);
     double delta_e = qSqrt((mathieu_q_val - q_b) * (mathieu_q_val - q_b) +
                            (mathieu_a_val - a_b) * (mathieu_a_val - a_b));
     double theta = StabilityCalculator::angularOffset(mathieu_a_val, a_b, mathieu_q_val, q_b);
@@ -199,6 +210,7 @@ void MathieuWindow::handleCalculation() {
         (2.0 * e_charge * calcInputs.charge_state);
     double resolution = (mathieu_a_val != 0.0) ? delta_a / std::abs(mathieu_a_val) : 0.0;
 
+    stabilityOutputs->clearWarning();
     stabilityOutputs->setDeltaA(delta_a);
     stabilityOutputs->setDeltaQ(delta_q);
     stabilityOutputs->setDeltaE(delta_e);

@@ -10,6 +10,7 @@ class StabilityRegionPlotter {
     void setupStabilityRegion(QCustomPlot* customPlot);
     void plotPoint(double q, double a);
     void drawNearestPointTriangle(double q, double a, double q_b, double a_b);
+    void drawUnstablePoint(double q, double a);
     double calculateUpperBoundary(double q);
 
    private:

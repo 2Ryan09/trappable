@@ -2,11 +2,35 @@
 
 StabilityOutputs::StabilityOutputs(QWidget* parent) : QWidget(parent) {
     auto* layout = new QGridLayout(this);
+    // Metrics title
     QLabel* titleLabel = new QLabel("Stability Metrics", this);
     QFont titleFont = titleLabel->font();
     titleFont.setBold(true);
     titleLabel->setFont(titleFont);
     layout->addWidget(titleLabel, 0, 0, 1, 3);
+
+    // Frosted glass warning overlay (hidden by default)
+    warningOverlay = new QWidget(this);
+    warningOverlay->setVisible(false);
+    warningOverlay->setAttribute(Qt::WA_TransparentForMouseEvents);
+
+    // Create a background widget for blur
+    QWidget* blurBg = new QWidget(warningOverlay);
+    blurBg->setStyleSheet("background: rgba(255,255,255,0.7);");
+    QGraphicsBlurEffect* blur = new QGraphicsBlurEffect(blurBg);
+    blur->setBlurRadius(32);
+    blurBg->setGraphicsEffect(blur);
+
+    // Overlay label (no blur)
+    overlayLabel = new QLabel(warningOverlay);
+    overlayLabel->setAlignment(Qt::AlignCenter);
+    QFont overlayFont;
+    overlayFont.setBold(true);
+    overlayFont.setPointSize(20);
+    overlayLabel->setFont(overlayFont);
+    overlayLabel->setStyleSheet("color: red;");
+    overlayLabel->setWordWrap(true);
+    overlayLabel->setText("Ion Unstable");
 
     QLabel* deltaANameLabel = new QLabel("Vertical distance to boundary:", this);
     deltaALabel = new QLabel("-", this);
@@ -65,6 +89,38 @@ StabilityOutputs::StabilityOutputs(QWidget* parent) : QWidget(parent) {
     layout->addWidget(resolutionUnitLabel, 8, 2);
 
     setLayout(layout);
+}
+
+void StabilityOutputs::resizeEvent(QResizeEvent* event) {
+    QWidget::resizeEvent(event);
+    if (warningOverlay) {
+        warningOverlay->raise();  // Ensure overlay is always on top
+        warningOverlay->setGeometry(rect());
+        // Resize blur background and label to fill overlay
+        QList<QWidget*> children = warningOverlay->findChildren<QWidget*>();
+        for (QWidget* child : children) {
+            child->setGeometry(warningOverlay->rect());
+        }
+    }
+}
+
+void StabilityOutputs::setWarning(const QString&) {
+    overlayLabel->setText("Ion Unstable");
+    warningOverlay->setVisible(true);
+    // Set all stability output labels to "-"
+    deltaALabel->setText("-");
+    deltaQLabel->setText("-");
+    deltaELabel->setText("-");
+    thetaLabel->setText("-");
+    sNormLabel->setText("-");
+    deltaMinLabel->setText("-");
+    voltageDiffLabel->setText("-");
+    resolutionLabel->setText("-");
+}
+
+void StabilityOutputs::clearWarning() {
+    overlayLabel->clear();
+    warningOverlay->setVisible(false);
 }
 
 void StabilityOutputs::setDeltaA(double value) {

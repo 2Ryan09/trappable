@@ -1,4 +1,5 @@
 
+
 #include "StabilityRegionPlotter.h"
 
 #include <QVector>
@@ -106,6 +107,32 @@ void StabilityRegionPlotter::drawNearestPointTriangle(double q, double a, double
     QPen ePen(Qt::darkYellow);
     ePen.setWidth(2);
     m_rightHorizontalLine->setPen(ePen);
+
+    m_plot->replot();
+}
+
+void StabilityRegionPlotter::drawUnstablePoint(double q, double a) {
+    if (!m_plot)
+        return;
+    // Remove previous point graph if it exists
+    if (m_pointGraph) {
+        m_plot->removeGraph(m_pointGraph);
+        m_pointGraph = nullptr;
+    }
+    // Draw a large red X at the point
+    QCPItemLine* xLine1 = new QCPItemLine(m_plot);
+    xLine1->setPen(QPen(Qt::red, 4));
+    xLine1->start->setType(QCPItemPosition::ptPlotCoords);
+    xLine1->end->setType(QCPItemPosition::ptPlotCoords);
+    xLine1->start->setCoords(q - 0.01, a - 0.01);
+    xLine1->end->setCoords(q + 0.01, a + 0.01);
+
+    QCPItemLine* xLine2 = new QCPItemLine(m_plot);
+    xLine2->setPen(QPen(Qt::red, 4));
+    xLine2->start->setType(QCPItemPosition::ptPlotCoords);
+    xLine2->end->setType(QCPItemPosition::ptPlotCoords);
+    xLine2->start->setCoords(q - 0.01, a + 0.01);
+    xLine2->end->setCoords(q + 0.01, a - 0.01);
 
     m_plot->replot();
 }

@@ -79,7 +79,7 @@ double verticalDistance(double a, double q) {
 
 double horizontalDistance(double q, double a) {
     auto [q_b, a_b] = findNearestBoundaryPoint(q, a);
-    return q_b - q;
+    return std::abs(q_b - q);
 }
 
 double euclideanDistance(double a, double q) {

@@ -31,8 +31,6 @@ namespace trappable {
  */
 MathieuWindow::MathieuWindow(QWidget* parent) : QWidget(parent) {
     setWindowTitle(QStringLiteral("Mathieu Quadrupole Stability Calculator"));
-    // Set window and taskbar icon (resource path to be updated when icon is available)
-    setWindowIcon(QIcon(":/icons/bayspec_logo_no_words.ico"));
     // Main vertical layout for header and content
     auto* mainLayout = new QVBoxLayout(this);
 

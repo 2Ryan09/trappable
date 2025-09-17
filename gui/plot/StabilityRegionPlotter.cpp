@@ -1,3 +1,4 @@
+
 #include "StabilityRegionPlotter.h"
 
 #include <QVector>
@@ -46,11 +47,7 @@ void StabilityRegionPlotter::setupStabilityRegion(QCustomPlot* customPlot) {
 void StabilityRegionPlotter::plotPoint(double q, double a) {
     if (!m_plot)
         return;
-    // Remove previous point graph if it exists
-    if (m_pointGraph) {
-        m_plot->removeGraph(m_pointGraph);
-        m_pointGraph = nullptr;
-    }
+    clearPlot();
     // Add new point graph
     m_pointGraph = m_plot->addGraph();
     m_pointGraph->setLineStyle(QCPGraph::lsNone);
@@ -115,25 +112,56 @@ void StabilityRegionPlotter::drawNearestPointTriangle(double q, double a, double
 void StabilityRegionPlotter::drawUnstablePoint(double q, double a) {
     if (!m_plot)
         return;
-    // Remove previous point graph if it exists
+    clearPlot();
+    // Draw a large red X at the point
+    m_xLine1 = new QCPItemLine(m_plot);
+    m_xLine1->setObjectName("unstableX1");
+    m_xLine1->setPen(QPen(Qt::red, 4));
+    m_xLine1->start->setType(QCPItemPosition::ptPlotCoords);
+    m_xLine1->end->setType(QCPItemPosition::ptPlotCoords);
+    m_xLine1->start->setCoords(q - 0.01, a - 0.01);
+    m_xLine1->end->setCoords(q + 0.01, a + 0.01);
+
+    m_xLine2 = new QCPItemLine(m_plot);
+    m_xLine2->setObjectName("unstableX2");
+    m_xLine2->setPen(QPen(Qt::red, 4));
+    m_xLine2->start->setType(QCPItemPosition::ptPlotCoords);
+    m_xLine2->end->setType(QCPItemPosition::ptPlotCoords);
+    m_xLine2->start->setCoords(q - 0.01, a + 0.01);
+    m_xLine2->end->setCoords(q + 0.01, a - 0.01);
+
+    m_plot->replot();
+}
+
+void StabilityRegionPlotter::clearPlot() {
+    if (!m_plot)
+        return;
+    // Remove point graph
     if (m_pointGraph) {
         m_plot->removeGraph(m_pointGraph);
         m_pointGraph = nullptr;
     }
-    // Draw a large red X at the point
-    QCPItemLine* xLine1 = new QCPItemLine(m_plot);
-    xLine1->setPen(QPen(Qt::red, 4));
-    xLine1->start->setType(QCPItemPosition::ptPlotCoords);
-    xLine1->end->setType(QCPItemPosition::ptPlotCoords);
-    xLine1->start->setCoords(q - 0.01, a - 0.01);
-    xLine1->end->setCoords(q + 0.01, a + 0.01);
-
-    QCPItemLine* xLine2 = new QCPItemLine(m_plot);
-    xLine2->setPen(QPen(Qt::red, 4));
-    xLine2->start->setType(QCPItemPosition::ptPlotCoords);
-    xLine2->end->setType(QCPItemPosition::ptPlotCoords);
-    xLine2->start->setCoords(q - 0.01, a + 0.01);
-    xLine2->end->setCoords(q + 0.01, a - 0.01);
-
+    // Remove X lines
+    if (m_xLine1) {
+        m_plot->removeItem(m_xLine1);
+        m_xLine1 = nullptr;
+    }
+    if (m_xLine2) {
+        m_plot->removeItem(m_xLine2);
+        m_xLine2 = nullptr;
+    }
+    // Remove triangle lines
+    if (m_verticalLine) {
+        m_plot->removeItem(m_verticalLine);
+        m_verticalLine = nullptr;
+    }
+    if (m_leftHorizontalLine) {
+        m_plot->removeItem(m_leftHorizontalLine);
+        m_leftHorizontalLine = nullptr;
+    }
+    if (m_rightHorizontalLine) {
+        m_plot->removeItem(m_rightHorizontalLine);
+        m_rightHorizontalLine = nullptr;
+    }
     m_plot->replot();
 }

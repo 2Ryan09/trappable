@@ -13,6 +13,7 @@ class Inputs : public QWidget {
     Q_OBJECT
    public:
     explicit Inputs(QWidget* parent = nullptr);
+    ~Inputs();
     bool validate();
 
     struct CalculationInputs {

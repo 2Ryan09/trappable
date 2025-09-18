@@ -8,6 +8,7 @@
 #include <memory>
 
 #include "Inputs.h"
+#include "MiniCalculator.h"
 #include "Outputs.h"
 #include "plot/StabilityRegionPlotter.h"
 #include "stability/StabilityOutputs.h"
@@ -19,6 +20,8 @@ class MathieuWindow : public QWidget {
     explicit MathieuWindow(QWidget* parent = nullptr);
     ~MathieuWindow() override;
 
+   public:
+    void triggerMiniCalculator();
     QPushButton* calcButton;
     class Inputs* inputs;
     class Outputs* outputs;
@@ -28,6 +31,9 @@ class MathieuWindow : public QWidget {
 
     // Stability outputs component
     StabilityOutputs* stabilityOutputs;
+
+    // MiniCalculator applet
+    MiniCalculator* miniCalculator;
 
    private:
     void validateInputs();

@@ -35,7 +35,6 @@ Inputs::Inputs(QWidget* parent) : QWidget(parent) {
     // Frequency
     frequencyEdit = makeLineEdit("frequencyEdit");
     frequencyEdit->setValidator(new QDoubleValidator(0, 1e12, 6, frequencyEdit));
-    frequencyEdit->setText("970000");
     frequencyUnitCombo = makeUnitCombo({"Hz", "kHz"});
     auto* freqLabel = new QLabel("Frequency:");
     layout->addWidget(freqLabel, inputRow, 0);
@@ -45,7 +44,6 @@ Inputs::Inputs(QWidget* parent) : QWidget(parent) {
     // Radius
     radiusEdit = makeLineEdit("radiusEdit");
     radiusEdit->setValidator(new QDoubleValidator(0, 1e6, 6, radiusEdit));
-    radiusEdit->setText("0.003478");
     radiusUnitCombo = makeUnitCombo({"m", "mm"});
     auto* radiusLabel = new QLabel("Quadrupole radius:");
     layout->addWidget(radiusLabel, inputRow, 0);
@@ -55,7 +53,6 @@ Inputs::Inputs(QWidget* parent) : QWidget(parent) {
     // Mass
     massEdit = makeLineEdit("massEdit");
     massEdit->setValidator(new QDoubleValidator(0, 1e6, 6, massEdit));
-    massEdit->setText("0.303");
     auto* massLabel = new QLabel("Molar mass:");
     auto* massUnitLabel = new QLabel("kg/mol");
     layout->addWidget(massLabel, inputRow, 0);
@@ -65,7 +62,6 @@ Inputs::Inputs(QWidget* parent) : QWidget(parent) {
     // RF Voltage
     voltageRfEdit = makeLineEdit("voltageRfEdit");
     voltageRfEdit->setValidator(new QDoubleValidator(-1e6, 1e6, 6, voltageRfEdit));
-    voltageRfEdit->setText("150");
     voltageRfUnitCombo = makeUnitCombo({"V", "mV"});
     auto* rfLabel = new QLabel("RF Voltage:");
     layout->addWidget(rfLabel, inputRow, 0);
@@ -75,7 +71,6 @@ Inputs::Inputs(QWidget* parent) : QWidget(parent) {
     // RF Voltage (max)
     voltageRfMaxEdit = makeLineEdit("voltageRfMaxEdit");
     voltageRfMaxEdit->setValidator(new QDoubleValidator(-1e6, 1e6, 6, voltageRfMaxEdit));
-    voltageRfMaxEdit->setText("3000");
     voltageRfMaxUnitCombo = makeUnitCombo({"V", "mV"});
     auto* rfMaxLabel = new QLabel("RF Voltage (max):");
     layout->addWidget(rfMaxLabel, inputRow, 0);
@@ -85,7 +80,6 @@ Inputs::Inputs(QWidget* parent) : QWidget(parent) {
     // DC Voltage
     voltageDcEdit = makeLineEdit("voltageDcEdit");
     voltageDcEdit->setValidator(new QDoubleValidator(-1e6, 1e6, 6, voltageDcEdit));
-    voltageDcEdit->setText("0");
     voltageDcUnitCombo = makeUnitCombo({"V", "mV"});
     auto* dcLabel = new QLabel("DC Voltage:");
     layout->addWidget(dcLabel, inputRow, 0);
@@ -95,13 +89,14 @@ Inputs::Inputs(QWidget* parent) : QWidget(parent) {
     // Charge state
     chargeStateEdit = makeLineEdit("chargeStateEdit");
     chargeStateEdit->setValidator(new QIntValidator(1, 100, chargeStateEdit));
-    chargeStateEdit->setText("1");
     auto* chargeLabel = new QLabel("Charge state:");
     layout->addWidget(chargeLabel, inputRow, 0);
     layout->addWidget(chargeStateEdit, inputRow, 1);
 
     setLayout(layout);
 }
+
+Inputs::~Inputs() {}
 
 bool Inputs::validate() {
     bool ok_freq = false, ok_radius = false, ok_mass = false, ok_voltage_rf = false,
@@ -144,7 +139,6 @@ bool Inputs::getCalculationInputs(CalculationInputs& calcInputs) const {
     if (radiusUnitCombo->currentText() == "mm")
         radius /= 1000.0;
     double mass = massEdit->text().toDouble(&ok_mass);
-    // mass is always in kg/mol, no conversion needed
     double voltage_rf = voltageRfEdit->text().toDouble(&ok_voltage_rf);
     if (voltageRfUnitCombo->currentText() == "mV")
         voltage_rf /= 1000.0;

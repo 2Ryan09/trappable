@@ -154,3 +154,5 @@ void StabilityOutputs::setVoltageDiff(double value) {
 void StabilityOutputs::setResolution(double value) {
     resolutionLabel->setText(QString::number(value, 'f', 3));
 }
+
+StabilityOutputs::~StabilityOutputs() {}

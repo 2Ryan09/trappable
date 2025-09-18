@@ -1,4 +1,3 @@
-
 #ifndef STABILITYREGIONPLOTTER_H
 #define STABILITYREGIONPLOTTER_H
 
@@ -7,6 +6,7 @@
 class StabilityRegionPlotter {
    public:
     StabilityRegionPlotter(QCustomPlot* plot);
+    ~StabilityRegionPlotter();
     void setupStabilityRegion(QCustomPlot* customPlot);
     void plotPoint(double q, double a);
     void drawNearestPointTriangle(double q, double a, double q_b, double a_b);

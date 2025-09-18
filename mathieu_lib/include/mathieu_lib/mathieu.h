@@ -14,9 +14,7 @@ struct QuadrupoleParams {
         : frequency(freq), quad_radius(radius), molar_mass(mass) {}
 };
 
-constexpr double AVOGADRO_NUMBER = 6.02214076E23;
-constexpr double MIN_Q = 0.25;
-constexpr double MAX_Q = 0.908;
+#include "Constants.h"
 
 auto omega(double frequency) -> double;
 auto omega(const std::vector<double>& frequencies) -> std::vector<double>;

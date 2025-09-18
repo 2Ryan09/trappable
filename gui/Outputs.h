@@ -10,6 +10,7 @@ class Outputs : public QWidget {
     Q_OBJECT
    public:
     explicit Outputs(QWidget* parent = nullptr);
+    ~Outputs();
     void setInvalid();
     void setValues(double omega_val, double particle_mass_val, double mathieu_q_val,
                    double mathieu_a_val, double beta_val, double secular_freq_val, double mz_val,

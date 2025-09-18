@@ -44,13 +44,21 @@ target_include_directories(stability PUBLIC
 )
 target_link_libraries(stability PRIVATE Qt6::Widgets Qt6::PrintSupport)
 
+add_library(minicalculator STATIC MiniCalculator.cpp MiniCalculator.h)
+target_include_directories(minicalculator PUBLIC
+	${CMAKE_CURRENT_SOURCE_DIR}
+	${CMAKE_SOURCE_DIR}/mathieu_lib/include
+)
+target_link_libraries(minicalculator PRIVATE Qt6::Widgets Qt6::PrintSupport)
+
 add_library(mathieuwindow STATIC MathieuWindow.cpp MathieuWindow.h Inputs.cpp Inputs.h Outputs.cpp Outputs.h)
 target_include_directories(mathieuwindow PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR}/plot
 	${CMAKE_CURRENT_SOURCE_DIR}/plot/QCustomPlot
 	${CMAKE_CURRENT_SOURCE_DIR}/stability
+	${CMAKE_SOURCE_DIR}/mathieu_lib/include
 )
-target_link_libraries(mathieuwindow PRIVATE stabilityregionplotter mathieubackend stability Qt6::Widgets Qt6::PrintSupport)
+target_link_libraries(mathieuwindow PRIVATE minicalculator stabilityregionplotter mathieubackend stability Qt6::Widgets Qt6::PrintSupport)
 
 qt_add_resources(GUI_RESOURCES icons.qrc)
 add_executable(gui WIN32 main.cpp ${APP_ICON_RESOURCE_WINDOWS} ${GUI_RESOURCES})

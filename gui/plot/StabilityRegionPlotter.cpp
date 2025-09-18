@@ -135,3 +135,5 @@ void StabilityRegionPlotter::drawUnstablePoint(double q, double a) {
 
     m_plot->replot();
 }
+
+StabilityRegionPlotter::~StabilityRegionPlotter() {}

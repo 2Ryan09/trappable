@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build-and-test:
@@ -15,7 +15,8 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake g++ qt6-base-dev qt6-base-private-dev qt6-tools-dev qt6-tools-dev-tools libgtest-dev
+          sudo apt-get install -y cmake g++ qt6-base-dev qt6-base-private-dev qt6-tools-dev qt6-tools-dev-tools libgtest-dev \
+            libxkbcommon-x11-0 libxcb-xinerama0 libxcb-xinput0 libxcb-xfixes0 libxcb-cursor0 libxcb-shape0 libxcb-randr0 libxcb-render-util0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-xkb1 libxrender1 libfontconfig1 fonts-dejavu-core
           cd /usr/src/googletest/googletest
           sudo cmake -DBUILD_SHARED_LIBS=ON .
           sudo make

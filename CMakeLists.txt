@@ -67,6 +67,10 @@ if(BUILD_TESTS)
 		BUILD_WITH_INSTALL_RPATH ON
 	)
 	add_test(NAME test_stabilityoutputs COMMAND test_stabilityoutputs)
+		set_tests_properties(test_stabilityoutputs PROPERTIES LABELS "gui")
+		if(DEFINED ENV{CI})
+			set_tests_properties(test_stabilityoutputs PROPERTIES DISABLED TRUE)
+		endif()
 
 	# Vectorized mathieu_lib tests
 	add_executable(test_mathieu_vector tests/test_mathieu_vector.cpp)

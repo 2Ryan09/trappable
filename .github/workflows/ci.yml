@@ -28,4 +28,4 @@ jobs:
         run: make -j$(nproc)
       - name: Run tests (Qt GUI headless)
         run: |
-          QT_QPA_PLATFORM=offscreen ctest --output-on-failure
+          xvfb-run -a QT_QPA_PLATFORM=offscreen ctest --output-on-failure

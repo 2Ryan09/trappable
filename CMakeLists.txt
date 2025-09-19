@@ -15,8 +15,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(CMAKE_AUTOMOC ON)
 
-set(CMAKE_SKIP_RPATH TRUE)
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
 
 
 add_subdirectory(mathieu_lib)
@@ -30,17 +28,17 @@ if(BUILD_TESTS)
 	include(FetchContent)
 	FetchContent_Declare(
 		googletest
-		URL https://github.com/google/googletest/archive/refs/heads/main.zip
+		URL https://github.com/google/googletest/archive/refs/tags/v1.14.0.zip
 		DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 	)
 	set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+	# Disable GoogleMock build
+	set(BUILD_GMOCK OFF CACHE BOOL "" FORCE)
 
 	FetchContent_MakeAvailable(googletest)
 	# Disable AUTOMOC for GoogleTest targets to avoid AUTOGEN Qt warnings
 	set_target_properties(gtest PROPERTIES AUTOMOC OFF)
 	set_target_properties(gtest_main PROPERTIES AUTOMOC OFF)
-	set_target_properties(gmock PROPERTIES AUTOMOC OFF)
-	set_target_properties(gmock_main PROPERTIES AUTOMOC OFF)
 
 	add_executable(test_mathieu tests/test_mathieu.cpp)
 	target_include_directories(test_mathieu PRIVATE ${CMAKE_SOURCE_DIR}/mathieu_lib/include ${CMAKE_SOURCE_DIR}/gui ${CMAKE_SOURCE_DIR}/gui/plot)

@@ -1,6 +1,7 @@
 #ifndef INPUTS_H
 #define INPUTS_H
 
+#include <QComboBox>
 #include <QGridLayout>
 #include <QGroupBox>
 #include <QLabel>
@@ -12,6 +13,7 @@ class Inputs : public QWidget {
     Q_OBJECT
    public:
     explicit Inputs(QWidget* parent = nullptr);
+    ~Inputs();
     bool validate();
 
     struct CalculationInputs {
@@ -27,23 +29,17 @@ class Inputs : public QWidget {
     // Returns true if all values are valid and fills calcInputs with converted values
     bool getCalculationInputs(CalculationInputs& calcInputs) const;
     QLineEdit* frequencyEdit;
-    QRadioButton* frequencyUnitHz;
-    QRadioButton* frequencyUnitKHz;
+    QComboBox* frequencyUnitCombo;
     QLineEdit* radiusEdit;
-    QRadioButton* radiusUnitM;
-    QRadioButton* radiusUnitMM;
+    QComboBox* radiusUnitCombo;
     QLineEdit* massEdit;
-    QRadioButton* massUnitKg;
-    QRadioButton* massUnitG;
+    QLabel* massUnitLabel;
     QLineEdit* voltageRfEdit;
-    QRadioButton* voltageRfUnitV;
-    QRadioButton* voltageRfUnitMV;
+    QComboBox* voltageRfUnitCombo;
     QLineEdit* voltageRfMaxEdit;
-    QRadioButton* voltageRfMaxUnitV;
-    QRadioButton* voltageRfMaxUnitMV;
+    QComboBox* voltageRfMaxUnitCombo;
     QLineEdit* voltageDcEdit;
-    QRadioButton* voltageDcUnitV;
-    QRadioButton* voltageDcUnitMV;
+    QComboBox* voltageDcUnitCombo;
     QLineEdit* chargeStateEdit;
 };
 

@@ -1,5 +1,4 @@
-# Build QCustomPlot as a static library for fast incremental builds
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.16...3.28)
 project(qcustomplot)
 
 set(CMAKE_AUTOMOC ON)

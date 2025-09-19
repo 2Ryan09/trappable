@@ -165,3 +165,5 @@ void StabilityRegionPlotter::clearPlot() {
     }
     m_plot->replot();
 }
+
+StabilityRegionPlotter::~StabilityRegionPlotter() {}

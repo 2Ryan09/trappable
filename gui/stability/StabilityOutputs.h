@@ -15,6 +15,7 @@ class StabilityOutputs : public QWidget {
     void setWarning(const QString& message);
     void clearWarning();
     explicit StabilityOutputs(QWidget* parent = nullptr);
+    ~StabilityOutputs();
     void setDeltaA(double value);
     void setVoltageDiff(double value);
     void setResolution(double value);

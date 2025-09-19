@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/icons">
+    <file>assets/bayspec_logo_no_words.ico</file>
+    <file>assets/bayspec_logo.png</file>
+    </qresource>
+</RCC>

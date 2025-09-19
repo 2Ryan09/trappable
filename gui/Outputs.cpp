@@ -82,6 +82,8 @@ Outputs::Outputs(QWidget* parent) : QWidget(parent) {
     setLayout(layout);
 }
 
+Outputs::~Outputs() {}
+
 void Outputs::setInvalid() {
     omegaValueLabel->setText("-");
     particleMassValueLabel->setText("-");

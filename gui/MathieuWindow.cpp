@@ -1,5 +1,6 @@
 #include "MathieuWindow.h"
 
+#include <QDir>
 #include <QDoubleValidator>
 #include <QFormLayout>
 #include <QIntValidator>
@@ -14,6 +15,8 @@
 #include "stability/StabilityCalculator.h"
 #include "stability/StabilityOutputs.h"
 
+namespace trappable {
+
 /**
  * @class MathieuWindow
  * @brief Main window for the Mathieu quadrupole stability calculator GUI.
@@ -21,82 +24,127 @@
  * Provides input fields, output display, and stability region plotting for scientific analysis
  * of quadrupole mass filters using the Mathieu equations. All scientific calculations are
  * delegated to mathieu_lib. UI is modular and follows Qt best practices.
- */
-namespace trappable {
-
-/**
- * @brief Construct the main window and initialize all widgets, layouts, and connections.
+ *
  * @param parent Optional parent widget.
  */
-MathieuWindow::MathieuWindow(QWidget* parent) : QWidget(parent) {
+trappable::MathieuWindow::MathieuWindow(QWidget* parent) : QWidget(parent) {
     setWindowTitle(QStringLiteral("Mathieu Quadrupole Stability Calculator"));
-    // Use a horizontal layout: left = inputs/results, right = plot
-    auto* mainLayout = new QHBoxLayout(this);
+    // Main vertical layout for header and content
+    auto* mainLayout = new QVBoxLayout(this);
+
+    // Header row with centered logo
+    auto* headerWidget = new QWidget(this);
+    auto* headerLayout = new QHBoxLayout(headerWidget);
+    headerLayout->setContentsMargins(0, 0, 0, 0);
+    headerLayout->addStretch();
+    auto* logoLabel = new QLabel(headerWidget);
+    QPixmap logoPixmap(":/icons/assets/bayspec_logo.png");
+    QFileInfo logoFileInfo(":/icons/assets/bayspec_logo.png");
+    QStringList resourceList = QDir(":/icons/assets").entryList();
+    // Print contents of the expected assets directory on disk
+    QDir assetsDir(QCoreApplication::applicationDirPath() + "/../gui/assets");
+    QResource resLogo(":/icons/assets/bayspec_logo.png");
+    QFile resourceFile(":/icons/assets/bayspec_logo.png");
+    bool resourceOpened = resourceFile.open(QIODevice::ReadOnly);
+    if (resourceOpened) {
+        QByteArray resourceData = resourceFile.readAll();
+        resourceFile.close();
+    }
+    if (logoPixmap.isNull()) {
+        qWarning() << "MathieuWindow: Logo not found.";
+        logoLabel->setText("Logo not found");
+    } else {
+        logoLabel->setPixmap(logoPixmap.scaledToHeight(64, Qt::SmoothTransformation));
+    }
+    logoLabel->setAlignment(Qt::AlignCenter);
+    headerLayout->addWidget(logoLabel);
+    headerLayout->addStretch();
+    headerWidget->setLayout(headerLayout);
+    mainLayout->addWidget(headerWidget);
+
+    // Content row: horizontal layout for left/right
+    auto* contentLayout = new QHBoxLayout;
+
     // Left side: inputs and outputs
     auto* leftWidget = new QWidget(this);
     auto* leftLayout = new QVBoxLayout(leftWidget);
     inputs = new Inputs(leftWidget);
     leftLayout->addWidget(inputs);
-
     calcButton = new QPushButton(QStringLiteral("Calculate"));
     calcButton->setObjectName(QStringLiteral("calcButton"));
     calcButton->setEnabled(false);
     leftLayout->addWidget(calcButton);
-
     auto* separator = new QFrame;
     separator->setFrameShape(QFrame::HLine);
     separator->setFrameShadow(QFrame::Sunken);
     leftLayout->addWidget(separator);
-
     outputs = new Outputs(leftWidget);
     leftLayout->addWidget(outputs);
-
+    miniCalculator = new MiniCalculator(leftWidget);
+    leftLayout->addWidget(miniCalculator);
+    // Update mini calculator parameters when main inputs change
+    auto updateMiniCalculatorParams = [this]() {
+        Inputs::CalculationInputs calcInputs;
+        if (inputs->getCalculationInputs(calcInputs)) {
+            miniCalculator->setParameters(calcInputs.radius, calcInputs.freq,
+                                          calcInputs.charge_state);
+        }
+    };
+    connect(inputs->frequencyEdit, &QLineEdit::textChanged, this, updateMiniCalculatorParams);
+    connect(inputs->radiusEdit, &QLineEdit::textChanged, this, updateMiniCalculatorParams);
+    connect(inputs->chargeStateEdit, &QLineEdit::textChanged, this, updateMiniCalculatorParams);
     leftLayout->addStretch();
-    mainLayout->addWidget(leftWidget, 0);  // left side, stretch factor 0
-    leftLayout->addStretch();
-    mainLayout->addWidget(leftWidget, 0);  // left side, stretch factor 0
+    leftWidget->setLayout(leftLayout);
+    contentLayout->addWidget(leftWidget, 0);
 
-    // Right side: large stability plot
-    stabilityPlotWidget = new QCustomPlot(this);
-    stabilityPlotWidget->setMinimumWidth(600);
-    stabilityPlotWidget->setMinimumHeight(400);
-    stabilityPlotWidget->setBackground(Qt::transparent);
-    // Add axes on the right and top
-    QCPAxis* rightAxis = stabilityPlotWidget->axisRect()->addAxis(QCPAxis::atRight);
-    QCPAxis* topAxis = stabilityPlotWidget->axisRect()->addAxis(QCPAxis::atTop);
-    rightAxis->setLabel("");
-    topAxis->setLabel("");
-    rightAxis->setTickLabels(false);
-    topAxis->setTickLabels(false);
-    mainLayout->addWidget(stabilityPlotWidget, 1);  // right side, stretch factor 1
+    // Right side: large stability plot and outputs
+    try {
+        stabilityPlotWidget = new QCustomPlot(this);
+        stabilityPlotWidget->setMinimumWidth(600);
+        stabilityPlotWidget->setMinimumHeight(400);
+        stabilityPlotWidget->setBackground(Qt::transparent);
+        QCPAxis* rightAxis = stabilityPlotWidget->axisRect()->addAxis(QCPAxis::atRight);
+        QCPAxis* topAxis = stabilityPlotWidget->axisRect()->addAxis(QCPAxis::atTop);
+        rightAxis->setLabel("");
+        topAxis->setLabel("");
+        rightAxis->setTickLabels(false);
+        topAxis->setTickLabels(false);
 
-    stabilityPlotter = new StabilityRegionPlotter(stabilityPlotWidget);
+        stabilityPlotter = new StabilityRegionPlotter(stabilityPlotWidget);
 
-    // Add plot labels for stability regions
-    QCPItemText* stableLabel = new QCPItemText(stabilityPlotWidget);
-    stableLabel->setPositionAlignment(Qt::AlignCenter);
-    stableLabel->position->setType(QCPItemPosition::ptPlotCoords);
-    stableLabel->position->setCoords(0.65, 0.15);
-    stableLabel->setText("stable");
-    stableLabel->setFont(QFont(font().family(), 12, QFont::Bold));
-    stableLabel->setColor(Qt::darkGreen);
+        QCPItemText* stableLabel = new QCPItemText(stabilityPlotWidget);
+        stableLabel->setPositionAlignment(Qt::AlignCenter);
+        stableLabel->position->setType(QCPItemPosition::ptPlotCoords);
+        stableLabel->position->setCoords(0.65, 0.15);
+        stableLabel->setText("stable");
+        stableLabel->setFont(QFont(font().family(), 12, QFont::Bold));
+        stableLabel->setColor(Qt::darkGreen);
 
-    QCPItemText* unstableLabel = new QCPItemText(stabilityPlotWidget);
-    unstableLabel->setPositionAlignment(Qt::AlignCenter);
-    unstableLabel->position->setType(QCPItemPosition::ptPlotCoords);
-    unstableLabel->position->setCoords(0.1, 0.15);
-    unstableLabel->setText("unstable");
-    unstableLabel->setFont(QFont(font().family(), 12, QFont::Bold));
-    unstableLabel->setColor(Qt::red);
+        QCPItemText* unstableLabel = new QCPItemText(stabilityPlotWidget);
+        unstableLabel->setPositionAlignment(Qt::AlignCenter);
+        unstableLabel->position->setType(QCPItemPosition::ptPlotCoords);
+        unstableLabel->position->setCoords(0.1, 0.15);
+        unstableLabel->setText("unstable");
+        unstableLabel->setFont(QFont(font().family(), 12, QFont::Bold));
+        unstableLabel->setColor(Qt::red);
 
-    // Add StabilityOutputs component below the plot
-    stabilityOutputs = new StabilityOutputs(this);
-    auto* rightLayout = new QVBoxLayout;
-    rightLayout->addWidget(stabilityPlotWidget);
-    rightLayout->addWidget(stabilityOutputs);
-    auto* rightWidget = new QWidget(this);
-    rightWidget->setLayout(rightLayout);
-    mainLayout->addWidget(rightWidget, 1);
+        stabilityOutputs = new StabilityOutputs(this);
+        auto* rightLayout = new QVBoxLayout;
+        rightLayout->addWidget(stabilityPlotWidget);
+        rightLayout->addWidget(stabilityOutputs);
+        auto* rightWidget = new QWidget(this);
+        rightWidget->setLayout(rightLayout);
+        contentLayout->addWidget(rightWidget, 1);
+    } catch (const std::exception& ex) {
+        qCritical() << "MathieuWindow: Exception during right-side widget construction:"
+                    << ex.what();
+    } catch (...) {
+        qCritical() << "MathieuWindow: Unknown exception during right-side widget construction.";
+    }
+
+    // Add the horizontal content row below the header
+    mainLayout->addLayout(contentLayout);
+    this->show();
 
     connect(
         calcButton, &QPushButton::clicked, this, [this]() { this->handleCalculation(); },
@@ -105,6 +153,14 @@ MathieuWindow::MathieuWindow(QWidget* parent) : QWidget(parent) {
     // Connect all input fields to validation logic
     auto connectInputValidation = [this](QLineEdit* edit) {
         connect(edit, &QLineEdit::textChanged, this, [this]() { this->validateInputs(); });
+        connect(edit, &QLineEdit::textChanged, this, [this]() {
+            Inputs::CalculationInputs calcInputs;
+            if (inputs->getCalculationInputs(calcInputs)) {
+                miniCalculator->setParameters(calcInputs.radius, calcInputs.freq,
+                                              calcInputs.charge_state);
+                miniCalculator->calculateMissingValue();
+            }
+        });
     };
     connectInputValidation(inputs->frequencyEdit);
     connectInputValidation(inputs->radiusEdit);
@@ -114,27 +170,28 @@ MathieuWindow::MathieuWindow(QWidget* parent) : QWidget(parent) {
     connectInputValidation(inputs->voltageDcEdit);
     connectInputValidation(inputs->chargeStateEdit);
 
-    // Also connect unit radio buttons to validation
-    auto connectUnitValidation = [this](QRadioButton* radio) {
-        connect(radio, &QRadioButton::toggled, this, [this]() { this->validateInputs(); });
+    // Connect unit dropdowns to validation
+    auto connectUnitComboValidation = [this](QComboBox* combo) {
+        connect(combo, &QComboBox::currentTextChanged, this, [this]() { this->validateInputs(); });
     };
-    connectUnitValidation(inputs->frequencyUnitHz);
-    connectUnitValidation(inputs->frequencyUnitKHz);
-    connectUnitValidation(inputs->radiusUnitM);
-    connectUnitValidation(inputs->radiusUnitMM);
-    connectUnitValidation(inputs->massUnitKg);
-    connectUnitValidation(inputs->massUnitG);
-    connectUnitValidation(inputs->voltageRfUnitV);
-    connectUnitValidation(inputs->voltageRfUnitMV);
-    connectUnitValidation(inputs->voltageRfMaxUnitV);
-    connectUnitValidation(inputs->voltageRfMaxUnitMV);
-    connectUnitValidation(inputs->voltageDcUnitV);
-    connectUnitValidation(inputs->voltageDcUnitMV);
+    connectUnitComboValidation(inputs->frequencyUnitCombo);
+    connectUnitComboValidation(inputs->radiusUnitCombo);
+    connectUnitComboValidation(inputs->voltageRfUnitCombo);
+    connectUnitComboValidation(inputs->voltageRfMaxUnitCombo);
+    connectUnitComboValidation(inputs->voltageDcUnitCombo);
     // Ensure initial validation state
     validateInputs();
 }
 
-MathieuWindow::~MathieuWindow() {
+void MathieuWindow::triggerMiniCalculator() {
+    Inputs::CalculationInputs calcInputs;
+    if (inputs->getCalculationInputs(calcInputs)) {
+        miniCalculator->setParameters(calcInputs.radius, calcInputs.freq, calcInputs.charge_state);
+        miniCalculator->calculateMissingValue();
+    }
+}
+
+trappable::MathieuWindow::~MathieuWindow() {
     // All child widgets are deleted by Qt's parent-child mechanism
 }
 
@@ -144,7 +201,7 @@ MathieuWindow::~MathieuWindow() {
  *        Also sets tooltips for invalid fields.
  */
 // Input validation is now handled by Inputs component
-void MathieuWindow::validateInputs() {
+void trappable::MathieuWindow::validateInputs() {
     bool allValid = inputs->validate();
     calcButton->setEnabled(allValid);
 }
@@ -153,7 +210,7 @@ void MathieuWindow::validateInputs() {
  * @brief Perform all scientific calculations and update output widgets and plot.
  *        Called when the Calculate button is pressed and inputs are valid.
  */
-void MathieuWindow::handleCalculation() {
+void trappable::MathieuWindow::handleCalculation() {
     Inputs::CalculationInputs calcInputs;
     bool ok = inputs->getCalculationInputs(calcInputs);
     if (!ok) {
@@ -226,9 +283,7 @@ void MathieuWindow::handleCalculation() {
  * @brief Set all output fields to "Invalid" when input validation fails.
  */
 // Output invalidation is now handled by Outputs component
-void MathieuWindow::setOutputInvalid() { outputs->setInvalid(); }
-// removed stray brace
-
+void trappable::MathieuWindow::setOutputInvalid() { outputs->setInvalid(); }
 /**
  * @brief Set all output fields to the calculated values, formatted for scientific readability.
  * @param omega_val Angular frequency (Hz)
@@ -242,13 +297,11 @@ void MathieuWindow::setOutputInvalid() { outputs->setInvalid(); }
  * @param max_mz_val Maximum m/z value (Da)
  */
 // Output value setting is now handled by Outputs component
-void MathieuWindow::setOutputValues(double omega_val, double particle_mass_val,
-                                    double mathieu_q_val, double mathieu_a_val, double beta_val,
-                                    double secular_freq_val, double mz_val, double lmco_val,
-                                    double max_mz_val) {
+void trappable::MathieuWindow::setOutputValues(double omega_val, double particle_mass_val,
+                                               double mathieu_q_val, double mathieu_a_val,
+                                               double beta_val, double secular_freq_val,
+                                               double mz_val, double lmco_val, double max_mz_val) {
     outputs->setValues(omega_val, particle_mass_val, mathieu_q_val, mathieu_a_val, beta_val,
                        secular_freq_val, mz_val, lmco_val, max_mz_val);
-    // removed stray brace
 }
-
 }  // namespace trappable

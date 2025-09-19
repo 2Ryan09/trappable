@@ -72,3 +72,4 @@ Thumbs.db
 
 # VSCode (uncomment if you want to ignore local settings)
 .vscode/
+.github/copilot-instructions.md

@@ -1,31 +1,70 @@
-name: CI
+name: Build and Deploy
 
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
-  build-and-test:
-    runs-on: ubuntu-latest
+  build:
+    runs-on: windows-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y cmake g++ qt6-base-dev qt6-base-private-dev qt6-tools-dev qt6-tools-dev-tools libgtest-dev \
-            libxkbcommon-x11-0 libxcb-xinerama0 libxcb-xinput0 libxcb-xfixes0 libxcb-cursor0 libxcb-shape0 libxcb-randr0 libxcb-render-util0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-xkb1 libxrender1 libfontconfig1 fonts-dejavu-core
-          cd /usr/src/googletest/googletest
-          sudo cmake -DBUILD_SHARED_LIBS=ON .
-          sudo make
-          sudo cp lib/libgtest*.so /usr/lib/
-          sudo ldconfig
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: '6.5.*'
+          host: 'windows'
+          target: 'desktop'
+          arch: 'win64_msvc2019_64'
+          cache: true
+
+      - name: Set up MSVC
+        uses: microsoft/setup-msbuild@v1.3
+        
       - name: Configure CMake
-        run: cmake .
-      - name: Build
-        run: make -j$(nproc)
-      - name: Run tests (Qt GUI headless)
+        run: cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -G "Visual Studio 17 2022" -A x64
+
+      - name: Build and test
+        env:
+          QTFRAMEWORK_BYPASS_LICENSE_CHECK: 1
         run: |
-          QT_QPA_PLATFORM=offscreen xvfb-run -a ctest --output-on-failure
+          cmake --build build --config Release --target gui
+          cd build
+          ctest --output-on-failure -C Release
+
+      - name: Create portable package
+        run: cmake --build build --target package_zip --config Release
+
+      - name: Find and verify ZIP file
+        run: |
+          $BUILD_VERSION = (git log -1 --format=%cd --date=format:%Y%m%d)
+          $SHORT_SHA = "${{ github.sha }}".Substring(0,8)
+          $PACKAGE_NAME = "trappable-$BUILD_VERSION-$SHORT_SHA-windows.zip"
+          $ZIP_PATH = "build\$PACKAGE_NAME"
+          
+          Write-Host "✓ ZIP file verified: $ZIP_PATH"
+          echo "PACKAGE_NAME=$PACKAGE_NAME" >> $env:GITHUB_ENV
+          echo "BUILD_VERSION=$BUILD_VERSION" >> $env:GITHUB_ENV
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: trappable-windows
+          path: build/${{ env.PACKAGE_NAME }}
+          retention-days: 30
+
+      - name: Upload to Dropbox
+        if: github.ref == 'refs/heads/main'
+        uses: Lewuathe/dropbox-github-action@v1.0.3
+        with:
+          dropbox-app-key: ${{ secrets.DROPBOX_APP_KEY }}
+          dropbox-app-secret: ${{ secrets.DROPBOX_APP_SECRET }}
+          dropbox-refresh-token: ${{ secrets.DROPBOX_REFRESH_TOKEN }}
+          source-path: build/${{ env.PACKAGE_NAME }}
+          target-path: /builds/${{ env.BUILD_VERSION }}/${{ env.PACKAGE_NAME }}
+          write-mode: add

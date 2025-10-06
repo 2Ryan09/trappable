@@ -65,6 +65,8 @@ add_executable(gui WIN32 main.cpp ${APP_ICON_RESOURCE_WINDOWS} ${GUI_RESOURCES})
 set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_CURRENT_SOURCE_DIR}/appicon.rc")
 
 target_link_libraries(gui PRIVATE mathieuwindow stabilityregionplotter mathieubackend stability Qt6::Widgets Qt6::PrintSupport mathieu_lib qcustomplot)
+
+# Runtime library paths - Qt DLLs will be in same directory as executable
 target_include_directories(gui PRIVATE
 	${CMAKE_SOURCE_DIR}/mathieu_lib/include
 	${CMAKE_CURRENT_SOURCE_DIR}/plot
@@ -72,8 +74,32 @@ target_include_directories(gui PRIVATE
 	${CMAKE_CURRENT_SOURCE_DIR}/stability
 )
 
+# Qt Deployment - Always bundle Qt
+# Create the deployment directory
+file(MAKE_DIRECTORY ${QT_DEPLOY_DIR})
+
+# Run windeployqt after building the GUI executable
+add_custom_command(TARGET gui POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E env QTFRAMEWORK_BYPASS_LICENSE_CHECK=1 ${CMAKE_COMMAND} -E copy $<TARGET_FILE:gui> ${QT_DEPLOY_DIR}/
+    COMMAND ${CMAKE_COMMAND} -E env QTFRAMEWORK_BYPASS_LICENSE_CHECK=1 ${QT_DEPLOY_TOOL} --verbose 2 --no-translations --no-system-d3d-compiler --no-virtualkeyboard --no-opengl-sw ${QT_DEPLOY_DIR}/gui.exe
+    COMMENT "Deploying Qt libraries for gui executable"
+)
+
+# Copy mathieu_lib to deployment directory
+add_custom_command(TARGET gui POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:mathieu_lib> ${QT_DEPLOY_DIR}/
+    COMMENT "Copying mathieu_lib to deployment directory"
+)
+
 # Install rules
 install(TARGETS gui mathieuwindow stabilityregionplotter mathieubackend stability
 	RUNTIME DESTINATION bin
 	ARCHIVE DESTINATION lib
 	LIBRARY DESTINATION lib)
+
+# Install Qt deployment - always include bundled Qt
+install(DIRECTORY ${QT_DEPLOY_DIR}/ DESTINATION bin
+    USE_SOURCE_PERMISSIONS
+    PATTERN "*.pdb" EXCLUDE
+    PATTERN "*.ilk" EXCLUDE
+)

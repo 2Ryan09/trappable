@@ -29,11 +29,18 @@ jobs:
       - name: Configure CMake
         run: cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -G "Visual Studio 17 2022" -A x64
 
-      - name: Build and test
+      - name: Build GUI
         env:
           QTFRAMEWORK_BYPASS_LICENSE_CHECK: 1
+        run: cmake --build build --config Release --target gui
+        
+      - name: Build tests
+        env:
+          QTFRAMEWORK_BYPASS_LICENSE_CHECK: 1
+        run: cmake --build build --config Release
+        
+      - name: Run tests
         run: |
-          cmake --build build --config Release --target gui
           cd build
           ctest --output-on-failure -C Release
 
@@ -52,7 +59,7 @@ jobs:
           echo "BUILD_VERSION=$BUILD_VERSION" >> $env:GITHUB_ENV
 
       - name: Upload to Dropbox
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' && success()
         uses: Lewuathe/dropbox-github-action@v1.0.3
         with:
           dropbox-app-key: ${{ secrets.DROPBOX_APP_KEY }}

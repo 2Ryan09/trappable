@@ -81,7 +81,7 @@ file(MAKE_DIRECTORY ${QT_DEPLOY_DIR})
 # Run windeployqt after building the GUI executable
 add_custom_command(TARGET gui POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E env QTFRAMEWORK_BYPASS_LICENSE_CHECK=1 ${CMAKE_COMMAND} -E copy $<TARGET_FILE:gui> ${QT_DEPLOY_DIR}/
-    COMMAND ${CMAKE_COMMAND} -E env QTFRAMEWORK_BYPASS_LICENSE_CHECK=1 ${QT_DEPLOY_TOOL} --verbose 2 --no-translations --no-system-d3d-compiler --no-virtualkeyboard --no-opengl-sw ${QT_DEPLOY_DIR}/gui.exe
+    COMMAND ${CMAKE_COMMAND} -E env QTFRAMEWORK_BYPASS_LICENSE_CHECK=1 ${QT_DEPLOY_TOOL} --verbose 2 --no-translations --no-system-d3d-compiler --no-opengl-sw ${QT_DEPLOY_DIR}/gui.exe
     COMMENT "Deploying Qt libraries for gui executable"
 )
 

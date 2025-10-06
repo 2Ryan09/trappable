@@ -51,13 +51,6 @@ jobs:
           echo "PACKAGE_NAME=$PACKAGE_NAME" >> $env:GITHUB_ENV
           echo "BUILD_VERSION=$BUILD_VERSION" >> $env:GITHUB_ENV
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: trappable-windows
-          path: build/${{ env.PACKAGE_NAME }}
-          retention-days: 30
-
       - name: Upload to Dropbox
         if: github.ref == 'refs/heads/main'
         uses: Lewuathe/dropbox-github-action@v1.0.3

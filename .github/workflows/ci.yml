@@ -49,7 +49,7 @@ jobs:
 
       - name: Find and verify ZIP file
         run: |
-          $BUILD_VERSION = (git log -1 --format=%cd --date=format:%Y%m%d)
+          $BUILD_VERSION = (git log -1 --format=%cd --date=format:%Y.%m%d)
           $SHORT_SHA = (git rev-parse --short HEAD)
           $PACKAGE_NAME = "trappable-$BUILD_VERSION-$SHORT_SHA-windows.zip"
           $ZIP_PATH = "build\$PACKAGE_NAME"

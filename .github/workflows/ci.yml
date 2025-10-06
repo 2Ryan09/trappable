@@ -50,13 +50,20 @@ jobs:
       - name: Find and verify ZIP file
         run: |
           $BUILD_VERSION = (git log -1 --format=%cd --date=format:%Y%m%d)
-          $SHORT_SHA = "${{ github.sha }}".Substring(0,8)
+          $SHORT_SHA = (git rev-parse --short HEAD)
           $PACKAGE_NAME = "trappable-$BUILD_VERSION-$SHORT_SHA-windows.zip"
           $ZIP_PATH = "build\$PACKAGE_NAME"
           
-          Write-Host "✓ ZIP file verified: $ZIP_PATH"
-          echo "PACKAGE_NAME=$PACKAGE_NAME" >> $env:GITHUB_ENV
-          echo "BUILD_VERSION=$BUILD_VERSION" >> $env:GITHUB_ENV
+          if (Test-Path $ZIP_PATH) {
+            Write-Host "✓ ZIP file verified: $ZIP_PATH"
+            echo "PACKAGE_NAME=$PACKAGE_NAME" >> $env:GITHUB_ENV
+            echo "BUILD_VERSION=$BUILD_VERSION" >> $env:GITHUB_ENV
+          } else {
+            Write-Host "✗ ZIP file not found: $ZIP_PATH"
+            Write-Host "Available files in build directory:"
+            Get-ChildItem build -Name
+            exit 1
+          }
 
       - name: Upload to Dropbox
         if: github.ref == 'refs/heads/main' && success()

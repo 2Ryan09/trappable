@@ -49,15 +49,16 @@ jobs:
 
       - name: Find and verify ZIP file
         run: |
-          $BUILD_VERSION = (git log -1 --format=%cd --date=format:%Y.%m%d)
+          $BUILD_VERSION_FILE = (git log -1 --format=%cd --date=format:%Y%m%d)
+          $BUILD_VERSION_FOLDER = (git log -1 --format=%cd --date=format:%Y.%m%d)
           $SHORT_SHA = (git rev-parse --short HEAD)
-          $PACKAGE_NAME = "trappable-$BUILD_VERSION-$SHORT_SHA-windows.zip"
+          $PACKAGE_NAME = "trappable-$BUILD_VERSION_FILE-$SHORT_SHA-windows.zip"
           $ZIP_PATH = "build\$PACKAGE_NAME"
           
           if (Test-Path $ZIP_PATH) {
             Write-Host "✓ ZIP file verified: $ZIP_PATH"
             echo "PACKAGE_NAME=$PACKAGE_NAME" >> $env:GITHUB_ENV
-            echo "BUILD_VERSION=$BUILD_VERSION" >> $env:GITHUB_ENV
+            echo "BUILD_VERSION_FOLDER=$BUILD_VERSION_FOLDER" >> $env:GITHUB_ENV
           } else {
             Write-Host "✗ ZIP file not found: $ZIP_PATH"
             Write-Host "Available files in build directory:"
@@ -73,5 +74,5 @@ jobs:
           dropbox-app-secret: ${{ secrets.DROPBOX_APP_SECRET }}
           dropbox-refresh-token: ${{ secrets.DROPBOX_REFRESH_TOKEN }}
           source-path: build/${{ env.PACKAGE_NAME }}
-          target-path: /builds/${{ env.BUILD_VERSION }}/${{ env.PACKAGE_NAME }}
+          target-path: /builds/${{ env.BUILD_VERSION_FOLDER }}/${{ env.PACKAGE_NAME }}
           write-mode: add

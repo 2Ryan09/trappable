@@ -204,12 +204,27 @@ jobs:
       - name: Upload to Dropbox
         timeout-minutes: 3
         continue-on-error: true
+        run: |
+          # Find the created ZIP file and upload it
+          $ZIP_FILE = Get-ChildItem "build" -Name "trappable-*-windows.zip" | Select-Object -First 1
+          if ($ZIP_FILE) {
+            Write-Output "Found ZIP file: $ZIP_FILE"
+            Write-Output "ZIP_UPLOAD_PATH=build/$ZIP_FILE" >> $env:GITHUB_ENV
+          } else {
+            Write-Output "No ZIP file found!"
+            exit 1
+          }
+        shell: pwsh
+        
+      - name: Actual Dropbox Upload
+        timeout-minutes: 3
+        continue-on-error: true
         uses: Lewuathe/dropbox-github-action@v1.0.3
         with:
           dropbox-app-key: ${{ secrets.DROPBOX_APP_KEY }}
           dropbox-app-secret: ${{ secrets.DROPBOX_APP_SECRET }}
           dropbox-refresh-token: ${{ secrets.DROPBOX_REFRESH_TOKEN }}
-          source-path: build/trappable-*-windows.zip
+          source-path: ${{ env.ZIP_UPLOAD_PATH }}
           target-path: /trappable/builds/trappable-latest-windows.zip
           write-mode: overwrite
 

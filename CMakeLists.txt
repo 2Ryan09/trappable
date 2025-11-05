@@ -96,20 +96,24 @@ if(BUILD_TESTS)
 	endif()
 endif()
 
-# Simple Windows packaging - just copy Qt DLLs manually
+# Simple Windows packaging - copy Qt DLLs from detected Qt installation
 if(WIN32)
+    # Get Qt installation directory from Qt6_DIR
+    get_filename_component(QT_BIN_DIR "${Qt6_DIR}/../../../bin" ABSOLUTE)
+    get_filename_component(QT_PLUGINS_DIR "${Qt6_DIR}/../../../plugins" ABSOLUTE)
+    
     add_custom_target(package_simple
         COMMAND ${CMAKE_COMMAND} -E rm -rf ${CMAKE_BINARY_DIR}/dist
         COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/dist
         COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:gui> ${CMAKE_BINARY_DIR}/dist/trappable.exe
-        COMMAND ${CMAKE_COMMAND} -E copy "C:/Qt/6.9.2/msvc2022_64/bin/Qt6Core.dll" ${CMAKE_BINARY_DIR}/dist/
-        COMMAND ${CMAKE_COMMAND} -E copy "C:/Qt/6.9.2/msvc2022_64/bin/Qt6Gui.dll" ${CMAKE_BINARY_DIR}/dist/
-        COMMAND ${CMAKE_COMMAND} -E copy "C:/Qt/6.9.2/msvc2022_64/bin/Qt6Widgets.dll" ${CMAKE_BINARY_DIR}/dist/
-        COMMAND ${CMAKE_COMMAND} -E copy "C:/Qt/6.9.2/msvc2022_64/bin/Qt6PrintSupport.dll" ${CMAKE_BINARY_DIR}/dist/
+        COMMAND ${CMAKE_COMMAND} -E copy "${QT_BIN_DIR}/Qt6Core.dll" ${CMAKE_BINARY_DIR}/dist/
+        COMMAND ${CMAKE_COMMAND} -E copy "${QT_BIN_DIR}/Qt6Gui.dll" ${CMAKE_BINARY_DIR}/dist/
+        COMMAND ${CMAKE_COMMAND} -E copy "${QT_BIN_DIR}/Qt6Widgets.dll" ${CMAKE_BINARY_DIR}/dist/
+        COMMAND ${CMAKE_COMMAND} -E copy "${QT_BIN_DIR}/Qt6PrintSupport.dll" ${CMAKE_BINARY_DIR}/dist/
         COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/dist/platforms
-        COMMAND ${CMAKE_COMMAND} -E copy "C:/Qt/6.9.2/msvc2022_64/plugins/platforms/qwindows.dll" ${CMAKE_BINARY_DIR}/dist/platforms/
+        COMMAND ${CMAKE_COMMAND} -E copy "${QT_PLUGINS_DIR}/platforms/qwindows.dll" ${CMAKE_BINARY_DIR}/dist/platforms/
         DEPENDS gui
-        COMMENT "Creating simple standalone package"
+        COMMENT "Creating simple standalone package from Qt at ${QT_BIN_DIR}"
     )
 endif()
 

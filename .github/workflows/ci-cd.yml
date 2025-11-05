@@ -41,7 +41,8 @@ jobs:
           cmake --build build --config Release --target test_mathieu
           cmake --build build --config Release --target test_mathieu_vector
           cd build
-          ctest --output-on-failure -C Release -R "test_mathieu"
+          # Run only non-GUI tests (exclude test_mathieu_e2e which requires GUI)
+          ctest --output-on-failure -C Release -E "test_mathieu_e2e"
         env:
           QTFRAMEWORK_BYPASS_LICENSE_CHECK: 1
 

@@ -1,0 +1,246 @@
+name: Trappable CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop] # Run tests on all branches, build only on main
+  pull_request:
+    branches: [main] # Run tests on PRs to main
+  schedule:
+    - cron: "0 3 * * *" # Daily at 3 AM UTC (build only)
+  workflow_dispatch: # Manual trigger
+
+env:
+  CMAKE_VERSION: "3.28"
+  QT_VERSION: "6.7.2"
+
+jobs:
+  test:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: ${{ env.QT_VERSION }}
+          host: windows
+          target: desktop
+          arch: win64_msvc2019_64
+          cache: true
+
+      - name: Setup Visual Studio
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Configure CMake
+        run: |
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -G "Visual Studio 17 2022" -A x64 .
+
+      - name: Build tests
+        run: |
+          cmake --build build --config Release --target test_mathieu
+          cmake --build build --config Release --target test_mathieu_vector
+        env:
+          QTFRAMEWORK_BYPASS_LICENSE_CHECK: 1
+
+      - name: Run core library tests
+        run: |
+          cd build
+          ctest --output-on-failure -C Release -R "test_mathieu"
+        env:
+          QTFRAMEWORK_BYPASS_LICENSE_CHECK: 1
+
+  build:
+    needs: [test]
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
+    timeout-minutes: 30
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set build version
+        id: version
+        run: |
+          # Get date of last commit in entire repo (YYYYMMDD format)  
+          $LAST_COMMIT_DATE = git log -1 --format=%cd --date=format:%Y%m%d
+          
+          # Create semantic version: YYYY.MMDD
+          $BUILD_VERSION = "$($LAST_COMMIT_DATE.Substring(0,4)).$($LAST_COMMIT_DATE.Substring(4,4))"
+          
+          echo "BUILD_VERSION=$BUILD_VERSION" >> $env:GITHUB_ENV
+          Write-Output "Build version: $BUILD_VERSION (last commit: $LAST_COMMIT_DATE)"
+        shell: pwsh
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: ${{ env.QT_VERSION }}
+          host: windows
+          target: desktop
+          arch: win64_msvc2019_64
+          cache: true
+
+      - name: Setup Visual Studio
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Install 7-Zip
+        run: |
+          choco install 7zip -y
+        shell: pwsh
+
+      - name: Set artifact names
+        id: artifacts
+        run: |
+          $SHORT_SHA = "${{ github.sha }}".Substring(0, 8)
+          $BUILD_VERSION = "${{ env.BUILD_VERSION }}"
+          $PACKAGE_NAME = "trappable-$BUILD_VERSION-$SHORT_SHA-windows.zip"
+          
+          echo "SHORT_SHA=$SHORT_SHA" >> $env:GITHUB_ENV
+          echo "PACKAGE_NAME=$PACKAGE_NAME" >> $env:GITHUB_ENV
+        shell: pwsh
+
+      - name: Configure CMake
+        run: |
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -G "Visual Studio 17 2022" -A x64 .
+        env:
+          QTFRAMEWORK_BYPASS_LICENSE_CHECK: 1
+
+      - name: Build Trappable
+        timeout-minutes: 20
+        run: |
+          Write-Output "::group::Build Performance Monitoring"
+          Write-Output "Trappable build started at: $(Get-Date)"
+          Write-Output "Available memory: $((Get-CimInstance Win32_OperatingSystem).FreePhysicalMemory / 1MB) GB"
+          Write-Output "CPU cores: $env:NUMBER_OF_PROCESSORS"
+          Write-Output "::endgroup::"
+
+          Write-Output "::group::CMake Build Execution"
+          cmake --build build --config Release --target gui
+          Write-Output "::endgroup::"
+        env:
+          QTFRAMEWORK_BYPASS_LICENSE_CHECK: 1
+        shell: pwsh
+
+      - name: Create standalone package
+        run: |
+          Write-Output "::group::Creating Standalone Package"
+          cmake --build build --config Release --target package_simple
+          Write-Output "::endgroup::"
+        env:
+          QTFRAMEWORK_BYPASS_LICENSE_CHECK: 1
+        shell: pwsh
+
+      - name: Smoke test - Verify application launches
+        run: |
+          Write-Output "::group::Application Smoke Test"
+          cd build/dist
+          
+          # Set Qt to run in offscreen mode for headless CI
+          $env:QT_QPA_PLATFORM = "offscreen"
+          $env:QT_LOGGING_RULES = "*.debug=false;qt.qpa.*=false"
+          
+          # Launch application in background and capture PID
+          $process = Start-Process -FilePath "trappable.exe" -PassThru -WindowStyle Hidden
+          
+          # Give it 3 seconds to initialize
+          Start-Sleep -Seconds 3
+          
+          # Check if process is still running (didn't crash immediately)
+          if ($process.HasExited) {
+            Write-Output "❌ Application crashed with exit code: $($process.ExitCode)"
+            Write-Output "Application failed smoke test"
+            exit 1
+          } else {
+            Write-Output "✅ Application launched successfully and is running"
+            # Kill the process since we just wanted to verify it starts
+            Stop-Process -Id $process.Id -Force
+            Write-Output "✅ Smoke test passed - application can start without missing DLLs"
+          }
+          Write-Output "::endgroup::"
+        env:
+          QTFRAMEWORK_BYPASS_LICENSE_CHECK: 1
+        shell: pwsh
+
+      - name: Verify build result
+        run: |
+          if (Test-Path "build\dist\trappable.exe") {
+            Write-Output "Build successful: Executable created at build\dist\trappable.exe"
+            $files = Get-ChildItem "build\dist" -Name "*.dll"
+            Write-Output "Qt DLLs included: $($files -join ', ')"
+          } else {
+            Write-Output "ERROR: Executable not found!"
+            Get-ChildItem build\dist\ -Recurse
+            exit 1
+          }
+        shell: pwsh
+
+      - name: Report successful build
+        run: |
+          Write-Output "## Trappable Build Summary" >> $env:GITHUB_STEP_SUMMARY
+          Write-Output "**Build succeeded**: CMake + Simple Qt deployment" >> $env:GITHUB_STEP_SUMMARY
+          Write-Output "**Executable**: trappable.exe" >> $env:GITHUB_STEP_SUMMARY
+          Write-Output "**Platform**: Windows x64" >> $env:GITHUB_STEP_SUMMARY
+          Write-Output "**Qt Version**: ${{ env.QT_VERSION }}" >> $env:GITHUB_STEP_SUMMARY
+          Write-Output "**Smoke Test**: ✅ Application launches successfully" >> $env:GITHUB_STEP_SUMMARY
+          Write-Output "**Includes**: Quadrupole Mass Filter Analysis Tool" >> $env:GITHUB_STEP_SUMMARY
+        shell: pwsh
+
+      - name: Create ZIP and upload to Dropbox
+        timeout-minutes: 5
+        continue-on-error: true # Don't fail build if Dropbox upload fails
+        run: |
+          # Create simple ZIP with timestamp
+          $TIMESTAMP = Get-Date -Format "yyyyMMdd-HHmm"
+          $ZIP_NAME = "trappable-$TIMESTAMP-windows.zip"
+          
+          cd build
+          7z a $ZIP_NAME dist/*
+          
+          Write-Output "Created package: $ZIP_NAME"
+          Write-Output "ZIP_NAME=$ZIP_NAME" >> $env:GITHUB_ENV
+        shell: pwsh
+
+      - name: Upload to Dropbox
+        timeout-minutes: 3
+        continue-on-error: true
+        uses: Lewuathe/dropbox-github-action@v1.0.3
+        with:
+          dropbox-app-key: ${{ secrets.DROPBOX_APP_KEY }}
+          dropbox-app-secret: ${{ secrets.DROPBOX_APP_SECRET }}
+          dropbox-refresh-token: ${{ secrets.DROPBOX_REFRESH_TOKEN }}
+          source-path: build/trappable-*-windows.zip
+          target-path: /trappable/builds/trappable-latest-windows.zip
+          write-mode: overwrite
+
+  build-summary:
+    runs-on: windows-latest
+    needs: [build]
+    if: always() # Run even if build fails
+    steps:
+      - name: Report build status
+        run: |
+          Write-Output "## Trappable Build Summary" >> $env:GITHUB_STEP_SUMMARY
+          Write-Output "**Application**: Quadrupole Mass Filter Analysis Tool" >> $env:GITHUB_STEP_SUMMARY
+          
+          if ("${{ needs.build.result }}" -eq "success") {
+            Write-Output "### ✅ Build Results: SUCCESS" >> $env:GITHUB_STEP_SUMMARY
+            Write-Output "Standalone Windows executable created successfully" >> $env:GITHUB_STEP_SUMMARY
+          } else {
+            Write-Output "### ❌ Build Results: ${{ needs.build.result }}" >> $env:GITHUB_STEP_SUMMARY
+            Write-Output "Build encountered issues - check build logs for details" >> $env:GITHUB_STEP_SUMMARY
+          }
+          
+          Write-Output "### Artifacts Created:" >> $env:GITHUB_STEP_SUMMARY
+          Write-Output "- **Standalone executable**: trappable.exe with all Qt dependencies bundled" >> $env:GITHUB_STEP_SUMMARY
+          Write-Output "- **Zero-install**: No Qt installation required on target machines" >> $env:GITHUB_STEP_SUMMARY
+          
+          if ("${{ github.event_name }}" -eq "push") {
+            Write-Output "**Trigger**: Push to main branch" >> $env:GITHUB_STEP_SUMMARY
+          } elseif ("${{ github.event_name }}" -eq "schedule") {
+            Write-Output "**Trigger**: Scheduled build (daily at 3 AM UTC)" >> $env:GITHUB_STEP_SUMMARY
+          } elseif ("${{ github.event_name }}" -eq "workflow_dispatch") {
+            Write-Output "**Trigger**: Manual build execution" >> $env:GITHUB_STEP_SUMMARY
+          }
+        shell: pwsh

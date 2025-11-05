@@ -15,14 +15,20 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(CMAKE_AUTOMOC ON)
 
-# Qt Deployment - Always bundle Qt for Windows
-set(QT_DEPLOY_DIR "${CMAKE_BINARY_DIR}/qt_deploy")
-
-# Find Qt deployment tool
-find_program(QT_DEPLOY_TOOL windeployqt HINTS ${Qt6_DIR}/../../../bin)
-if(NOT QT_DEPLOY_TOOL)
-    message(FATAL_ERROR "windeployqt not found. Cannot deploy Qt libraries.")
+# Ensure Release builds are optimized
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
 endif()
+
+# Windows-specific settings for standalone executable
+if(WIN32)
+    set(CMAKE_WIN32_EXECUTABLE TRUE)
+    # Set Qt deployment path
+    set(QT_DEPLOY_PATH "C:/Qt/6.9.2/msvc2022_64/bin" CACHE PATH "Path to Qt deployment tools")
+endif()
+
+# Set environment variable to bypass Qt license check
+set(ENV{QTFRAMEWORK_BYPASS_LICENSE_CHECK} 1)
 
 add_subdirectory(mathieu_lib)
 add_subdirectory(gui)
@@ -97,45 +103,26 @@ if(BUILD_TESTS)
 	add_test(NAME test_mathieu_e2e COMMAND test_mathieu_e2e)
 endif()
 
-# Install rules
+# Simple Windows packaging - just copy Qt DLLs manually
+if(WIN32)
+    add_custom_target(package_simple
+        COMMAND ${CMAKE_COMMAND} -E rm -rf ${CMAKE_BINARY_DIR}/dist
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/dist
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:gui> ${CMAKE_BINARY_DIR}/dist/trappable.exe
+        COMMAND ${CMAKE_COMMAND} -E copy "C:/Qt/6.9.2/msvc2022_64/bin/Qt6Core.dll" ${CMAKE_BINARY_DIR}/dist/
+        COMMAND ${CMAKE_COMMAND} -E copy "C:/Qt/6.9.2/msvc2022_64/bin/Qt6Gui.dll" ${CMAKE_BINARY_DIR}/dist/
+        COMMAND ${CMAKE_COMMAND} -E copy "C:/Qt/6.9.2/msvc2022_64/bin/Qt6Widgets.dll" ${CMAKE_BINARY_DIR}/dist/
+        COMMAND ${CMAKE_COMMAND} -E copy "C:/Qt/6.9.2/msvc2022_64/bin/Qt6PrintSupport.dll" ${CMAKE_BINARY_DIR}/dist/
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/dist/platforms
+        COMMAND ${CMAKE_COMMAND} -E copy "C:/Qt/6.9.2/msvc2022_64/plugins/platforms/qwindows.dll" ${CMAKE_BINARY_DIR}/dist/platforms/
+        DEPENDS gui
+        COMMENT "Creating simple standalone package"
+    )
+endif()
+
+# Simple install rules (optional - mainly for development)
 install(TARGETS mathieu_lib
 		ARCHIVE DESTINATION lib
 		LIBRARY DESTINATION lib
 		RUNTIME DESTINATION bin)
 install(DIRECTORY mathieu_lib/include/ DESTINATION include)
-
-# Create portable distribution target
-add_custom_target(package_portable
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${QT_DEPLOY_DIR} ${CMAKE_BINARY_DIR}/trappable/
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/README.md ${CMAKE_BINARY_DIR}/trappable/
-    COMMAND ${CMAKE_COMMAND} -E echo "Portable distribution created in: ${CMAKE_BINARY_DIR}/trappable/"
-    DEPENDS gui
-    COMMENT "Creating portable distribution with bundled Qt"
-)
-
-# Create ZIP package with versioned name
-find_program(ZIP_PROGRAM 7z HINTS "C:/Program Files/7-Zip" "C:/Program Files (x86)/7-Zip")
-
-# Get version info for ZIP naming
-execute_process(
-    COMMAND git log -1 --format=%cd --date=format:%Y%m%d
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    OUTPUT_VARIABLE BUILD_VERSION
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-
-execute_process(
-    COMMAND git rev-parse --short HEAD
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    OUTPUT_VARIABLE SHORT_SHA
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-
-set(PACKAGE_NAME "trappable-${BUILD_VERSION}-${SHORT_SHA}-windows.zip")
-
-add_custom_target(package_zip
-    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target package_portable
-    COMMAND ${ZIP_PROGRAM} a -tzip ${CMAKE_BINARY_DIR}/${PACKAGE_NAME} ${CMAKE_BINARY_DIR}/trappable/*
-    DEPENDS package_portable
-    COMMENT "Creating ZIP package: ${PACKAGE_NAME}"
-)

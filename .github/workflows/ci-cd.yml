@@ -36,15 +36,10 @@ jobs:
         run: |
           cmake -B build -DCMAKE_BUILD_TYPE=Release -G "Visual Studio 17 2022" -A x64 .
 
-      - name: Build tests
+      - name: Build and run core library tests
         run: |
           cmake --build build --config Release --target test_mathieu
           cmake --build build --config Release --target test_mathieu_vector
-        env:
-          QTFRAMEWORK_BYPASS_LICENSE_CHECK: 1
-
-      - name: Run core library tests
-        run: |
           cd build
           ctest --output-on-failure -C Release -R "test_mathieu"
         env:

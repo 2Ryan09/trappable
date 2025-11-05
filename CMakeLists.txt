@@ -20,9 +20,8 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-# Windows-specific settings for standalone executable
+# Windows-specific settings
 if(WIN32)
-    set(CMAKE_WIN32_EXECUTABLE TRUE)
     # Set Qt deployment path
     set(QT_DEPLOY_PATH "C:/Qt/6.9.2/msvc2022_64/bin" CACHE PATH "Path to Qt deployment tools")
 endif()

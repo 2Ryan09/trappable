@@ -36,13 +36,16 @@ jobs:
         run: |
           cmake -B build -DCMAKE_BUILD_TYPE=Release -G "Visual Studio 17 2022" -A x64 .
 
-      - name: Build and run core library tests
+      - name: Build and run core tests
         run: |
+          # Build only the core library tests (no Qt dependencies)
           cmake --build build --config Release --target test_mathieu
           cmake --build build --config Release --target test_mathieu_vector
+          
+          # Run just these two core tests
           cd build
-          # Run only non-GUI tests (exclude test_mathieu_e2e which requires GUI)
-          ctest --output-on-failure -C Release -E "test_mathieu_e2e"
+          ./Release/test_mathieu.exe
+          ./Release/test_mathieu_vector.exe
         env:
           QTFRAMEWORK_BYPASS_LICENSE_CHECK: 1
 
